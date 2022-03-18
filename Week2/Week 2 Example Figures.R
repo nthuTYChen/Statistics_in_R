@@ -85,3 +85,49 @@ ggplot(data=norm, aes(x=z, y=Values)) +
   geom_line(stat="identity", lwd=1.5) +
   labs(title = "Figure 6", subtitle = "Normal Distribution", caption = "Mean = 0, SD = 1; Orange = 2.5%",
        x = "z", y = "Density") + theme_bw()
+
+# Supplementary Materials 1
+
+source("https://lngproc.fl.nthu.edu.tw/statisticsR/Week2/distExamples.R")
+
+dist.skewR.norm = dnorm(seq(58000:300000), mean = 129000, sd = 39718.07)
+
+dist.a = data.frame(x = density(dist.skewR)$x, y = density(dist.skewR)$y, Distribution = "Sample")
+dist.b = data.frame(x = seq(58000:300000), y = dist.skewR.norm, Distribution = "Theoretical")
+dist.skewR.comp = rbind(dist.a, dist.b)
+
+dist.skewR.ord = dist.skewR[order(dist.skewR)]
+dist.skewR.5perc = dist.skewR.ord[95]
+
+dist.skewR.norm.5perc = qnorm(p = .95, mean = 129000, sd = 39716.07)
+
+ggplot(dist.skewR.comp, aes(x = x, y = y, color = Distribution)) +
+  geom_line(stat = "identity", lwd = 2) +
+  geom_area(data = subset(dist.skewR.comp, Distribution == "Sample" & x >= dist.skewR.5perc), 
+            fill = "red", alpha = 0.5) +
+  geom_area(data = subset(dist.skewR.comp, Distribution == "Theoretical" & x >= dist.skewR.norm.5perc), 
+            fill = "turquoise", alpha = 0.5) +
+  labs(title = "Figure 1. Rightly skewed vs. Theoretical distribution", x = "Value", y = "Density",
+       subtitle = "Mean = 129,000; SD = 39716.07", caption = "Shaded Area = 95%-100%") +
+  theme_bw()
+
+dist.skewL.norm = dnorm(seq(58000:300000) * -1, mean = -129000, sd = 39718.07)
+
+dist.a = data.frame(x = density(dist.skewL)$x, y = density(dist.skewL)$y, Distribution = "Sample")
+dist.b = data.frame(x = seq(58000:300000) * -1, y = dist.skewL.norm, Distribution = "Theoretical")
+dist.skewL.comp = rbind(dist.a, dist.b)
+
+dist.skewL.ord = dist.skewL[order(dist.skewL)]
+dist.skewL.5perc = dist.skewL.ord[5]
+
+dist.skewL.norm.5perc = qnorm(p = .05, mean = -129000, sd = 39716.07)
+
+ggplot(dist.skewL.comp, aes(x = x, y = y, color = Distribution)) +
+  geom_line(stat = "identity", lwd = 2) +
+  geom_area(data = subset(dist.skewL.comp, Distribution == "Sample" & x <= dist.skewL.5perc), 
+            fill = "red", alpha = 0.5) +
+  geom_area(data = subset(dist.skewL.comp, Distribution == "Theoretical" & x <= dist.skewL.norm.5perc), 
+            fill = "turquoise", alpha = 0.5) +
+  labs(title = "Figure 2. Leftly skewed vs. Theoretical distribution", x = "Value", y = "Density",
+       subtitle = "Mean = -129,000; SD = 39716.07", caption = "Shaded Area = 0%-5%") +
+  theme_bw()
