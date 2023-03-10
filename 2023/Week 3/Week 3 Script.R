@@ -134,37 +134,75 @@ plot(dist.skewR.den, main = "Non-normal distrubtion; Right Skewness")
 abline(v = mean(dist.skewR), col = "red", lwd = 1.5)
 abline(v = median(dist.skewR), col = "blue", lwd = 1.5)
 
+# Use range() to get the minimum and the maximum of a numeric vector
+# The wider the range is, the more variance a sample distribution has, and
+# the less certain you would be with the conclusion you get from
+# the sample distribution.
 range(dist.norm)
+# You can compare a range to a median to see if the distance between the median
+# and the minimum is comparable to that between the median and the maximum.
+# A symmetrical (normal) distribution would have similar distances on both
+# sides of a median.
 median(dist.norm)
 range(dist.skewL)
 median(dist.skewL)
 range(dist.skewR)
 median(dist.skewR)
 
+# Use summary() to get some critical information for a distribution of
+# numeric values. See Week 3 handout for detailed explanation.
+# Crucially, when you order the numeric values of a distribution from
+# the smallest value to the highest value, you can divide the entire 
+# distribution into four equal portions, each of which is a "quartile".
+# Thus, every quartile covers 25% of the data.
 summary(dist.norm)
 
+# IQR = inter-quartile range, that is, the difference between the number
+# separating the 1st quartile from the 2nd one and the number separating 
+# the 3rd quartile from the 4th one.
 IQR(dist.norm)
 
-# Standard Deviation
+# Standard Deviation = Average difference between individual data points
+# and the mean of a sample distribution.
+# Get the mean first.
 dist.norm.mean = mean(dist.norm)
+# Substract the mean from EACH of the numeric values in the sample 
+# distribution, and get a vector with all the individual differences.
 dist.norm.diff = dist.norm - dist.norm.mean
 
+# Logically, when you divide the total of the differences by the number
+# of data points, you get an average difference. But here you get a zero.
+# See Week 3 handout for a detailed explanation.
 sum(dist.norm.diff) / length(dist.norm.diff)
 
 # SS = Sum of Squares
+# To solve the problem, we square the individual differences (negative
+# values become positive, and positive values stay positive).
+# and add squared differences together, so we get a Sum of Squares.
 ss.norm = sum(dist.norm.diff ^ 2)
 
-# For population
+# We we divide SS with the number of data points, we get an average
+# "squared" difference.
 ss.norm / length(dist.norm.diff)
-
+# However, when we validate the number with var(), which calculates
+# the SS (which also represents the variance of a distribution), the
+# number is different. This is because the above calculation is for
+# a population.
 var(dist.norm)
 
-# For sample distribution
+# For the SS of a sample distribution, the denominator should decrease
+# by 1, and the reason will be explained in the rest of this course.
+# And you get the right number.
 ss.norm / (length(dist.norm.diff) - 1)
 
+# Since the average difference is still squared, we need to calculate
+# the square root of the number with sqrt(), so we can really get
+# an average difference, which is our SD.
 sd.norm = sqrt(ss.norm / (length(dist.norm.diff) - 1))
+# We can then validate our calculated with sd(), too.
 sd(dist.norm)
 
+# Just try to add lines indicating +-1SD from mean in a density plot
 dist.norm.den = density(dist.norm)
 plot(dist.norm.den, main = "(Near-)Normal Distribution")
 abline(v = dist.norm.mean, col = "red", lwd = 1.5)
@@ -172,12 +210,20 @@ abline(v = median(dist.norm), col = "blue", lwd = 1.5)
 abline(v = dist.norm.mean + sd.norm, col = "green", lwd = 1.5, lty = 2)
 abline(v = dist.norm.mean - sd.norm, col = "green", lwd = 1.5, lty = 2)
 
+# See the Week 3 handout for detailed explanations of how Q-Q plot works
 qqnorm(dist.norm, main = "Normal Q-Q Plot: dist.norm")
 qqline(dist.norm, col = "red")
 
 qqnorm(dist.skewL, main = "Normal Q-Q Plot: dist.norm")
 qqline(dist.skewL, col = "red")
 
-pnorm(q = -1.96)
-pnorm(q = 1.96)
-pnorm(q = 1.96, lower.tail = F)
+# Get a probability of observing a value from the lower tail of a distribution 
+# below a boundary represented by an SD.
+pnorm(q = -1.96)  # 0.025 = 2.5% only
+pnorm(q = 1.96)   # 0.0975 = 97.5%
+# Set "lower.tail" to F(ALSE), so pnorm() gives the probability in the upper tail
+# of a data distribution
+pnorm(q = 1.96, lower.tail = F) # 0.025 = 2.5% only
+
+# So, in both lower and upper tails, the areas below an SD of -1.96 and above an
+# SD of 1.96 represent a total chance of 5% of observing some more extreme value.
