@@ -133,3 +133,51 @@ dist.skewR.den = density(dist.skewR)
 plot(dist.skewR.den, main = "Non-normal distrubtion; Right Skewness")
 abline(v = mean(dist.skewR), col = "red", lwd = 1.5)
 abline(v = median(dist.skewR), col = "blue", lwd = 1.5)
+
+range(dist.norm)
+median(dist.norm)
+range(dist.skewL)
+median(dist.skewL)
+range(dist.skewR)
+median(dist.skewR)
+
+summary(dist.norm)
+
+IQR(dist.norm)
+
+# Standard Deviation
+dist.norm.mean = mean(dist.norm)
+dist.norm.diff = dist.norm - dist.norm.mean
+
+sum(dist.norm.diff) / length(dist.norm.diff)
+
+# SS = Sum of Squares
+ss.norm = sum(dist.norm.diff ^ 2)
+
+# For population
+ss.norm / length(dist.norm.diff)
+
+var(dist.norm)
+
+# For sample distribution
+ss.norm / (length(dist.norm.diff) - 1)
+
+sd.norm = sqrt(ss.norm / (length(dist.norm.diff) - 1))
+sd(dist.norm)
+
+dist.norm.den = density(dist.norm)
+plot(dist.norm.den, main = "(Near-)Normal Distribution")
+abline(v = dist.norm.mean, col = "red", lwd = 1.5)
+abline(v = median(dist.norm), col = "blue", lwd = 1.5)
+abline(v = dist.norm.mean + sd.norm, col = "green", lwd = 1.5, lty = 2)
+abline(v = dist.norm.mean - sd.norm, col = "green", lwd = 1.5, lty = 2)
+
+qqnorm(dist.norm, main = "Normal Q-Q Plot: dist.norm")
+qqline(dist.norm, col = "red")
+
+qqnorm(dist.skewL, main = "Normal Q-Q Plot: dist.norm")
+qqline(dist.skewL, col = "red")
+
+pnorm(q = -1.96)
+pnorm(q = 1.96)
+pnorm(q = 1.96, lower.tail = F)
