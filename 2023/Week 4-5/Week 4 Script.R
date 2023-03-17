@@ -43,3 +43,85 @@ wordRT.new = melt(wordRT, id.var = "Word", variable.name = "Gender", value.name 
 
 # Then, you can use nrow() to check how many rows/observation there is in the new data frame.
 nrow(wordRT.new)
+
+jabberwocky.wd = loadCourseCSV("Week4-5", "jabberwocky_words.txt")
+nrow(jabberwocky.wd)
+
+jabberwocky.table = table(jabberwocky.wd$Word)
+
+jabberwocky.df = as.data.frame(jabberwocky.table)
+
+colnames(jabberwocky.df) = c("Word", "Count")
+
+nrow(jabberwocky.df)
+sum(jabberwocky.df$Count)
+
+order(jabberwocky.df$Count, decreasing = TRUE)
+
+jabberwocky.df[71,]
+
+count.des.ord = order(jabberwocky.df$Count, decreasing = TRUE)
+
+jabberwocky.ord = jabberwocky.df[count.des.ord, ]
+
+jabberwocky.wordCat = 
+  loadCourseCSV("Week4-5", "jabberwocky_words_cat.csv")
+
+pos.na = is.na(jabberwocky.wordCat$POS)
+sum(pos.na)
+
+jabberwocky.wordCat[pos.na, ]
+jabberwocky.wordCat[!pos.na, ]
+
+jabberwocky.all = 
+  merge(jabberwocky.ord, jabberwocky.wordCat, by = "Word")
+
+xtabs(formula = Count ~ Real, data = jabberwocky.all)
+
+xtabs(formula = ~ Real, data = jabberwocky.all)
+
+# 2 x 2 Contingency Table
+jabberwocky.xtabs = 
+  xtabs(formula = ~ Real + POS, data = jabberwocky.all)
+
+jabberwocky.sum = sum(jabberwocky.xtabs)
+jabberwocky.xtabs / 
+  
+jabberwocky.perc = 
+  round(x = jabberwocky.xtabs / jabberwocky.sum * 100, digit = 1)
+
+library(languageR)
+head(durationsOnt)
+
+summary(durationsOnt$DurationOfPrefix)
+
+abs(median(durationsOnt$DurationOfPrefix) - 
+      mean(durationsOnt$DurationOfPrefix))
+
+abs(0.1167 - 0.1581)
+abs(0.1581 - 0.1743)
+
+par(mfrow = c(1, 2))
+plot(density(durationsOnt$DurationOfPrefix),
+     main = "Duration of ont- Prefix (Density)")
+abline(v = median(durationsOnt$DurationOfPrefix), col = "blue",
+       lwd = 1.5)
+abline(v = mean(durationsOnt$DurationOfPrefix), col = "red", 
+       lwd = 1.5)
+
+qqnorm(durationsOnt$DurationOfPrefix, 
+       main = "Duration of ont- Prefix (Q-Q Plot)")
+qqline(durationsOnt$DurationOfPrefix, col = "red", lwd = 1.5)
+
+par(mfrow = c(1, 1))
+
+pnorm(q = -2.5)
+pnorm(q = -2.5) * 2
+pnorm(q = -3) * 2
+
+# Mean +- SD * 2.5
+sd.lower = mean(durationsOnt$DurationOfPrefix) -
+  sd(durationsOnt$DurationOfPrefix) * 2.5
+
+sd.upper = mean(durationsOnt$DurationOfPrefix) +
+  sd(durationsOnt$DurationOfPrefix) * 2.5
