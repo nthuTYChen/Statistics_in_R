@@ -175,3 +175,72 @@ sd.lower = mean(durationsOnt$DurationOfPrefix) -
 
 sd.upper = mean(durationsOnt$DurationOfPrefix) +
   sd(durationsOnt$DurationOfPrefix) * 2.5
+
+outliers = durationsOnt$DurationOfPrefix < sd.lower |
+  durationsOnt$DurationOfPrefix > sd.upper
+
+sum(outliers)
+
+durationsOnt[outliers, ]
+
+head(durationsOnt$Frequency)
+
+durationsOnt$Frequency.raw = exp(durationsOnt$Frequency)
+
+par(mfrow = c(1, 2))
+plot(density(durationsOnt$Frequency.raw), 
+     main = "Raw Frequency of ont- Words (Density)")
+qqnorm(durationsOnt$Frequency.raw, 
+       main = "Raw Frequency of ont- Words (Q-Q Plot)")
+qqline(durationsOnt$Frequency.raw, col = "red", lwd = 1.5)
+
+log(c(0.5, 1, 2, 4, 8))
+log(c(200, 400, 800))
+
+plot(density(durationsOnt$Frequency), 
+     main = "Log Frequency of ont- Words (Density)")
+qqnorm(durationsOnt$Frequency,
+       main = "Log Frequency of ont- Words (Q-Q Plot)")
+qqline(durationsOnt$Frequency, col = "red", lwd = 1.5)
+par(mfrow = c(1, 1))
+
+durationsOnt$Frequency.cat = 
+  ifelse(test = durationsOnt$Frequency >= 
+           median(durationsOnt$Frequency),
+         yes = "High", no = "Low")
+
+aggregate(x = DurationOfPrefix ~ Frequency.cat,
+          FUN = mean, data = durationsOnt)
+
+aggregate(x = DurationOfPrefix ~ Frequency.cat,
+          FUN = sd, data = durationsOnt)
+
+cor(durationsOnt$Frequency, durationsOnt$DurationOfPrefix)
+
+jabberwocky.table = table(jabberwocky.wd$Word)
+jabberwocky.table = 
+  jabberwocky.table[order(jabberwocky.table, decreasing = T)]
+
+jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
+
+barplot(height = jabberwocky.table.2, 
+        main = "Jabberwocky Word Count (Token Freq > 2)",
+        xlab = "", ylab = "Count", ylim = c(0, 20), las = 2)
+
+jabberwocky.df = as.data.frame(jabberwocky.table)
+colnames(jabberwocky.df) = c("Word", "Count")
+jabberwocky.wordCat = 
+  loadCourseCSV("Week4-5", "jabberwocky_words_cat.csv")
+jabberwocky.all = 
+  merge(jabberwocky.df, jabberwocky.wordCat, by = "Word")
+jabberwocky.xtabs = xtabs(~ Real + POS, jabberwocky.all)
+
+mosaicplot(x = jabberwocky.xtabs, 
+           main = "Jabberwocky Word Types Dsitribution",
+           xlab = "Real Word", ylab = "Part of Speech",
+           color = c("white", "grey40"))
+
+boxplot(DurationOfPrefix ~ Frequency.cat, data = durationsOnt,
+        main = "Prefix Duration by Frequency", 
+        xlab = "log Frequency divided by Median",
+        ylab = "Duration in ms")
