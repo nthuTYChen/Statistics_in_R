@@ -176,17 +176,29 @@ sd.lower = mean(durationsOnt$DurationOfPrefix) -
 sd.upper = mean(durationsOnt$DurationOfPrefix) +
   sd(durationsOnt$DurationOfPrefix) * 2.5
 
+# Judging by whether DurationOfPrefix is lower than sd.lower
+# OR higher than sd.upper, you get TRUEs and FALSEs to indication
+# if each value in DurationOfPrefix is an outlier
 outliers = durationsOnt$DurationOfPrefix < sd.lower |
   durationsOnt$DurationOfPrefix > sd.upper
 
+# TRUEs are converted into 1s and FALSES into 0s in sum(), so you
+# get the total number of outliers (only 1).
 sum(outliers)
 
+# Use TRUEs and FALSES in "outliers" to select "TRUE" rows from
+# the data frame durationsOnly.
 durationsOnt[outliers, ]
 
+# The "Frequency" is in fact log-transformed (natural log)
 head(durationsOnt$Frequency)
 
+# Convert log-transformed frequencies back to raw frequencies
+# with exp() since the oppsite of logs is exponents.
 durationsOnt$Frequency.raw = exp(durationsOnt$Frequency)
 
+# Visualize a right-skewed raw frequency distribution following
+# the Zipf's Law (many low-frequency words and a few high-frequency words)
 par(mfrow = c(1, 2))
 plot(density(durationsOnt$Frequency.raw), 
      main = "Raw Frequency of ont- Words (Density)")
@@ -194,9 +206,13 @@ qqnorm(durationsOnt$Frequency.raw,
        main = "Raw Frequency of ont- Words (Q-Q Plot)")
 qqline(durationsOnt$Frequency.raw, col = "red", lwd = 1.5)
 
+# Compare the difference between small numbers to those between big numbers
+# before and after log-transformation; the distance is made equal between
+# small numbers and between large numbers after log-transformation.
 log(c(0.5, 1, 2, 4, 8))
 log(c(200, 400, 800))
 
+# Visualize a normal-like log frequency distribution
 plot(density(durationsOnt$Frequency), 
      main = "Log Frequency of ont- Words (Density)")
 qqnorm(durationsOnt$Frequency,
@@ -204,31 +220,55 @@ qqnorm(durationsOnt$Frequency,
 qqline(durationsOnt$Frequency, col = "red", lwd = 1.5)
 par(mfrow = c(1, 1))
 
+# Categorize words based on whether its log frequency is higher
+# than or equal to the median log frequency.
+# ifelse() returns a vector of "yes" and "no" values based on
+# the results of the "test", and the vector is stored into the
+# Frequency.cat variable in durationsOnt data frame.
 durationsOnt$Frequency.cat = 
   ifelse(test = durationsOnt$Frequency >= 
            median(durationsOnt$Frequency),
          yes = "High", no = "Low")
 
+# Sort DurationOfPrefix data based on the frequency category 
+# (High vs. Low) and apply the mean() function to calculate
+# the average log frequency for each category.
 aggregate(x = DurationOfPrefix ~ Frequency.cat,
           FUN = mean, data = durationsOnt)
 
+# Sort DurationOfPrefix data based on the frequency category 
+# (High vs. Low) and apply the sd() function to calculate
+# the standard deviation of log frequency for each category.
 aggregate(x = DurationOfPrefix ~ Frequency.cat,
           FUN = sd, data = durationsOnt)
 
+# Get Pearson's correlation coefficient; a small negative value
+# means a negative correlation between word frequency and the
+# duration of the ont- prefix.
 cor(durationsOnt$Frequency, durationsOnt$DurationOfPrefix)
 
+# Make sure that you have jabberwocky.wd loaded into your R
+# Generate the frequency table of jabberwocky again.
 jabberwocky.table = table(jabberwocky.wd$Word)
+# Sort the frequency counts by a decreasing order
 jabberwocky.table = 
   jabberwocky.table[order(jabberwocky.table, decreasing = T)]
 
+# Exclude data entries with a frequency count higher than 1
+# Again, the condition "jabberwocky.table > 1" gives you
+# TRUEs and FALSES, and putting them into [] of a table means...?
 jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
 
+# See Week 4-5 handout for the detailed explanations of the 
+# data visualization process below.
 barplot(height = jabberwocky.table.2, 
         main = "Jabberwocky Word Count (Token Freq > 2)",
         xlab = "", ylab = "Count", ylim = c(0, 20), las = 2)
 
 jabberwocky.df = as.data.frame(jabberwocky.table)
 colnames(jabberwocky.df) = c("Word", "Count")
+
+# Make sure that you have loadCourseCSV() ready, too.
 jabberwocky.wordCat = 
   loadCourseCSV("Week4-5", "jabberwocky_words_cat.csv")
 jabberwocky.all = 
