@@ -284,3 +284,71 @@ boxplot(DurationOfPrefix ~ Frequency.cat, data = durationsOnt,
         main = "Prefix Duration by Frequency", 
         xlab = "log Frequency divided by Median",
         ylab = "Duration in ms")
+
+boxplot(durationsOnt$SpeechRate, 
+        main = "Speech Rate Distribution",
+        ylab = "Syllable Number per Second")
+
+boxplot(durationsOnt$SpeechRate, 
+        main = "Speech Rate Distribution",
+        ylab = "Syllable Number per Second", outline = F)
+
+plot(DurationOfPrefix ~ Frequency, data = durationsOnt,
+     main = "Frequency-Duration Correlation in durationsOnt",
+     xlab = "log Word Frequency per Million",
+     ylab = "ont- Prefix Duration (s)", ylim =c(0, 0.3))
+
+dursOnt.m = subset(durationsOnt, Sex == "male")
+dursOnt.f = subset(durationsOnt, Sex == "female")
+
+plot(DurationOfPrefix ~ Frequency, data = dursOnt.m,
+     main = "Frequency-Duration Correlation by Gender",
+     xlab = "log Word Frequency per Millon",
+     ylab = "ont- Prefix Duration (s)", ylim =c(0, 0.3))
+
+points(DurationOfPrefix ~ Frequency, data = dursOnt.f,
+       pch = 2, col = "red")
+
+legend(title = "Sex", legend = c("Male", "Female"), 
+       pch = c(1, 2), col = c("black", "red"), x = "bottom",
+       ncol = 2, bty = "n", cex = 0.8)
+
+library(ggplot2)
+
+jabberwocky.2.df = as.data.frame(jabberwocky.table.2)
+colnames(jabberwocky.2.df) = c("Word", "Count")
+
+ggplot(data = jabberwocky.2.df, 
+       mapping = aes(x = Word, y = Count)) +
+  geom_bar(stat = "identity") + coord_flip() +
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) +
+  labs(x = "Word", y = "Token Frequency", 
+       title = "Jabberwocky Corpus", 
+       caption = "Token Frequency > 1 Only") + theme_bw()
+
+jabberwocky.2.df$Frequency = 
+  ifelse(jabberwocky.2.df$Count > 2, yes = "> 2", no = "= 2")
+
+ggplot(data = jabberwocky.2.df, 
+       mapping = aes(x = Word, y = Count, fill = Frequency)) +
+  geom_bar(stat = "identity") + coord_flip() +
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) +
+  labs(x = "Word", y = "Token Frequency", 
+       title = "Jabberwocky Corpus", 
+       caption = "Token Frequency > 1 Only") + theme_bw()
+
+ggplot(data = durationsOnt, 
+       mapping = aes(x = Frequency.cat, y = DurationOfPrefix)) +
+  geom_boxplot() + 
+  geom_point(mapping = aes(color = Frequency.cat), 
+             alpha = 0.5, size = 3,
+             position = position_jitterdodge(jitter.width = 0.5)) +
+  guides(color = "none")
+
+ggplot(data = durationsOnt, 
+       mapping = aes(x = Frequency, y = DurationOfPrefix)) +
+  geom_point(color = "grey40", size = 3, alpha = 0.7) +
+  facet_grid(. ~ Sex) +
+  labs(title = "Correlation between Frequency and ont- Prefix Duration",
+       caption = "Word frequency per million is log-transformed",
+       x = "Word Frequency", y = "Durations (s)") + theme_bw()
