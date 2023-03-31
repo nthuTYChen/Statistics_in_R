@@ -3,7 +3,7 @@ conf.rt =
      read.csv("https://lngproc.hss.nthu.edu.tw/statisticsR/Week4-5/confRT.csv") 
 head(conf.rt)
 
-#1
+# 1
 # The number of values in RT is equal to the number of rows in a data frame.
 nrow(conf.rt)	#4117
 # You get the same number by measuring the length of the variable as a vector.
@@ -52,4 +52,4 @@ nrow(conf.rt.sub)/nrow(conf.rt)	# 0.004615011
 # 10
 # The probability of observing a value equal to or higher than mean + sd * 1.5
 # is much smaller in our sample distribution than in the normal distribution.
-# Thus, our sample distribution deviates substaintialy from the normal distribution.
+# Thus, our sample distribution deviates substantially from the normal distribution.
