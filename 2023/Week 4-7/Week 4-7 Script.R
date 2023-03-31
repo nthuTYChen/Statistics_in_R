@@ -280,44 +280,70 @@ mosaicplot(x = jabberwocky.xtabs,
            xlab = "Real Word", ylab = "Part of Speech",
            color = c("white", "grey40"))
 
+# This boxplot example is different from the one in the handout,
+# since the latter use the data from Myers (2015)
 boxplot(DurationOfPrefix ~ Frequency.cat, data = durationsOnt,
         main = "Prefix Duration by Frequency", 
         xlab = "log Frequency divided by Median",
         ylab = "Duration in ms")
 
+# You can generate a boxplot of ONE sample distribution by passing
+# a vector of numeric values to boxplot() without using a y ~ x
+# formula or specifying a data source. This example is for showing
+# outliers in a boxplot.
 boxplot(durationsOnt$SpeechRate, 
         main = "Speech Rate Distribution",
         ylab = "Syllable Number per Second")
 
+
+# You can "turn off" the outliers by setting "outline" to FALSE,
+# but people usually show outliers since it is part of your sample.
 boxplot(durationsOnt$SpeechRate, 
         main = "Speech Rate Distribution",
         ylab = "Syllable Number per Second", outline = F)
 
+# To truly show the correlation between word frequency and prefix
+# duration, we need to generate a scatter plot with plot(), in which
+# we use the y ~ x formula to place individual data points in a 2D
+# space. The negative correlation is visually present.
 plot(DurationOfPrefix ~ Frequency, data = durationsOnt,
      main = "Frequency-Duration Correlation in durationsOnt",
      xlab = "log Word Frequency per Million",
      ylab = "ont- Prefix Duration (s)", ylim =c(0, 0.3))
 
+# Try to check if the negative correlation holds when we look at
+# male and female speakers separately. So, get two subsets by gender
+# first.
 dursOnt.m = subset(durationsOnt, Sex == "male")
 dursOnt.f = subset(durationsOnt, Sex == "female")
 
+# Generate the scatter plot for male speakers first.
 plot(DurationOfPrefix ~ Frequency, data = dursOnt.m,
      main = "Frequency-Duration Correlation by Gender",
-     xlab = "log Word Frequency per Millon",
+     xlab = "log Word Frequency per Millon Words",
      ylab = "ont- Prefix Duration (s)", ylim =c(0, 0.3))
 
+# Add the individual data points from the female speakers
+# to the existing plot using points() with the same y ~ x
+# formula. "pch" = point character, and "2" means triangles.
 points(DurationOfPrefix ~ Frequency, data = dursOnt.f,
        pch = 2, col = "red")
 
+# Add a legend to explain the visual differences. See the 
+# for detailed explanations.
 legend(title = "Sex", legend = c("Male", "Female"), 
        pch = c(1, 2), col = c("black", "red"), x = "bottom",
        ncol = 2, bty = "n", cex = 0.8)
 
+# Move on to the ggplot2 package.
 library(ggplot2)
 
+# Redo the barplot of the Jabberwocky corpus. Make sure that
+# you still have jabberwocky.table.2 at this point.
 jabberwocky.2.df = as.data.frame(jabberwocky.table.2)
 colnames(jabberwocky.2.df) = c("Word", "Count")
 
+# Check the handout for explanations of how ggplot2 works.
 ggplot(data = jabberwocky.2.df, 
        mapping = aes(x = Word, y = Count)) +
   geom_bar(stat = "identity") + coord_flip() +
@@ -326,9 +352,18 @@ ggplot(data = jabberwocky.2.df,
        title = "Jabberwocky Corpus", 
        caption = "Token Frequency > 1 Only") + theme_bw()
 
+# Try to mark bars with a different color depending on whether 
+# the counts are higher than 2 or not. So, create a new variable
+# "Frequency" in the data frame, whose values are dependent on
+# whether the "Count" variable is higher than 2 or not. If yes,
+# the returned value would be a string "> 2". If no, the value
+# would a string "= 2".
 jabberwocky.2.df$Frequency = 
   ifelse(jabberwocky.2.df$Count > 2, yes = "> 2", no = "= 2")
 
+# Map the new variable "Frequency" to "fill", so the bars will be
+# filled with a different color based on whether the value is
+# "> 2" or "= 2".
 ggplot(data = jabberwocky.2.df, 
        mapping = aes(x = Word, y = Count, fill = Frequency)) +
   geom_bar(stat = "identity") + coord_flip() +
@@ -337,17 +372,34 @@ ggplot(data = jabberwocky.2.df,
        title = "Jabberwocky Corpus", 
        caption = "Token Frequency > 1 Only") + theme_bw()
 
+# Generate a boxplot with individual data points (which is difficult
+# to be done with base functions). Once again, the example is 
+# different from the one in the handout, since the latter uses the
+# data from Myers (2015).
 ggplot(data = durationsOnt, 
        mapping = aes(x = Frequency.cat, y = DurationOfPrefix)) +
+  # After the mapping is done, present the data in a boxplot first.
   geom_boxplot() + 
+  # Then, add individual data points to the boxplot plot. In this
+  # geom_point() function, we create another mapping between "Frequency"
+  # and color specifically for individual data points, so the dots
+  # are colored based on whether they are from the high/low frequency
+  # category. Check the handout for what each parameter means.
   geom_point(mapping = aes(color = Frequency.cat), 
              alpha = 0.5, size = 3,
              position = position_jitterdodge(jitter.width = 0.5)) +
+  # Turn of the legend for color information, since it is already
+  # clear which color represents which frequency category.
   guides(color = "none")
 
+# Generate a scatter plot showing the same duration ~ frequency
+# correlation.
 ggplot(data = durationsOnt, 
        mapping = aes(x = Frequency, y = DurationOfPrefix)) +
   geom_point(color = "grey40", size = 3, alpha = 0.7) +
+  # Divide the plot by the variable "Sex" in the data frame, so
+  # the scatter plot is splitted up into two columns (if the formula
+  # is "Sex ~ .", then the plot is splitted up into two rows).
   facet_grid(. ~ Sex) +
   labs(title = "Correlation between Frequency and ont- Prefix Duration",
        caption = "Word frequency per million is log-transformed",
