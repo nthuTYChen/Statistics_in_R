@@ -48,7 +48,7 @@ colnames(phoible.seg) = c("Macroarea", "SegmentN.mean", "SegmentN.sd")
 # information about a distribution, including median, quartiles, and outliers.
 
 # Task VII
-# The formula "SegmentN ~ macroarea" means 
+# The formula "SegmentN ~ macroarea" means to group segment numbers by macroareas
 boxplot(SegmentN ~ macroarea, data = phoible.area, 
         main = "Segment Numbers by Macroarea", xlab = "Macroareas", 
         ylab = "Total Number of Segments")
