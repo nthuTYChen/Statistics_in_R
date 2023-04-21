@@ -131,3 +131,58 @@ t.test(x = group2, mu = 300)
 # 10,000 times, so the difference is very unlikely
 # due to randomness. That is, the difference is
 # statistically significant.
+
+library(languageR)
+cor(durationsOnt$Frequency, 
+    durationsOnt$DurationOfPrefix)
+
+freq.mean = mean(durationsOnt$Frequency)
+dur.mean = mean(durationsOnt$DurationOfPrefix)
+
+sum.prod = sum((durationsOnt$Frequency - freq.mean) *
+        (durationsOnt$DurationOfPrefix - dur.mean))
+
+freq.dur.cov = sum.prod / (nrow(durationsOnt) - 1)
+
+cov(durationsOnt$Frequency, 
+    durationsOnt$DurationOfPrefix)
+
+durationsOnt$Freq.10x = durationsOnt$Frequency * 10
+
+cov(durationsOnt$Freq.10x, 
+    durationsOnt$DurationOfPrefix)
+
+scale(c(5, 10))
+scale(c(50, 100))
+
+cov(scale(durationsOnt$Freq.10x), 
+    scale(durationsOnt$DurationOfPrefix))
+
+freq.dur.cor.2 = cor(durationsOnt$Frequency, 
+    durationsOnt$DurationOfPrefix) ^ 2
+
+r = cor(durationsOnt$Frequency, 
+        durationsOnt$DurationOfPrefix)
+n = nrow(durationsOnt)
+t = r / (sqrt(1 - freq.dur.cor.2) / sqrt(n - 2))
+
+p = pt(t, df = n - 2, lower.tail = TRUE)
+p * 2
+
+cor.test(x = scale(durationsOnt$Freq.10x), 
+         y = scale(durationsOnt$DurationOfPrefix))
+
+source("https://lngproc.hss.nthu.edu.tw/statisticsR/courseUtil.R")
+Myers.clean = loadCourseCSV("Week7-9", "MyersClean.csv")
+
+table(Myers.clean$Session)
+
+s1.rt = Myers.clean[Myers.clean$Session == 1,]$logRT
+s2.rt = Myers.clean[Myers.clean$Session == 2,]$logRT
+
+t.test(x = s1.rt, y = s2.rt, var = TRUE)
+
+var.test.res = var.test(x = s1.rt, y = s2.rt)
+var.test.res$p.value
+
+t.test(x = s1.rt, y = s2.rt)
