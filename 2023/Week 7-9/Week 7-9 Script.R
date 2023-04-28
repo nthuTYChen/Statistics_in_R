@@ -272,3 +272,20 @@ var.test.res$p.value
 # differences between the outputs of the two statistical analyses as well as
 # their connection to Type I and Type II Errors.
 t.test(x = s1.rt, y = s2.rt)
+
+overgen = loadCourseCSV(week = "Week7-9", file = "overgen.csv")
+
+overgen$Error.diff = overgen$Error_2 - overgen$Error_3
+
+diff.mean = mean(overgen$Error.diff)
+diff.sd = sd(overgen$Error.diff)
+diff.se = diff.sd / sqrt(nrow(overgen))
+
+overgen.t = diff.mean / diff.se
+
+overgen.p = pt(q = overgen.t, df = nrow(overgen) - 1, lower.tail = FALSE)
+overgen.p * 2
+
+t.test(x = overgen$Error_2, y = overgen$Error_3, paired = TRUE)
+
+t.test(x = overgen$Error_2, y = overgen$Error_3)
