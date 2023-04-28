@@ -273,19 +273,39 @@ var.test.res$p.value
 # their connection to Type I and Type II Errors.
 t.test(x = s1.rt, y = s2.rt)
 
+# Load the dataset for demonstrating a paired t-test of the overgeneralization 
+# issue in language acquisition. Check the handout for more explanation.
 overgen = loadCourseCSV(week = "Week7-9", file = "overgen.csv")
 
+# Manually calculate the difference between every pair of error numbers.
 overgen$Error.diff = overgen$Error_2 - overgen$Error_3
 
+# Get the mean/sd/se of the differences.
 diff.mean = mean(overgen$Error.diff)
 diff.sd = sd(overgen$Error.diff)
 diff.se = diff.sd / sqrt(nrow(overgen))
 
+# Get the t-value following the formula for a paired t-test in the handout
 overgen.t = diff.mean / diff.se
 
+# The t-value is positive, so get the one-tailed p-value from the
+# upper tail of a t-distribution
 overgen.p = pt(q = overgen.t, df = nrow(overgen) - 1, lower.tail = FALSE)
+# Get the two-tailed p
 overgen.p * 2
 
+# You'll find the same t-statistics using t.test() and specify "paired"
+# as TRUE. When you run a paired t-test and specify x and y manually,
+# please make sure that x and y are ordered properly so they are indeed
+# paired in a way.
 t.test(x = overgen$Error_2, y = overgen$Error_3, paired = TRUE)
 
+# Try to analyze the two samples with an unpaired t-test assuming
+# an unequal variance. You get a much lower two-tailed p, thus a
+# higher chance of Type I Error (i.e., false positive)
 t.test(x = overgen$Error_2, y = overgen$Error_3)
+
+# I didn't have the time to take you through the codes for calculating
+# confidence intervals and Cohen's d, but you're highly advised to go
+# through the two sections in the handout to better understand the
+# concepts as well as the R codes.
