@@ -40,3 +40,68 @@ sl.sim = loadCourseCSV(week = "Week10-11", file = "SaitoLysterSim.csv")
 # the "unique labels", or formally known as "levels/categories".
 # We can use levels() to check the levels of a factor.
 levels(as.factor(sl.sim$Group))
+
+sl.sim.aov = aov(formula = rF3 ~ Group, data = sl.sim)
+summary(sl.sim.aov)
+
+5345500 / 107131
+
+mean.grand = mean(sl.sim$rF3)
+mean.control = mean(sl.sim[sl.sim$Group == "Control",]$rF3)
+mean.ffi = mean(sl.sim[sl.sim$Group == "FFI",]$rF3)
+mean.fficf = mean(sl.sim[sl.sim$Group == "FFI+CF",]$rF3)
+
+ss.control = (mean.control - mean.grand) ^ 2
+ss.ffi = (mean.ffi - mean.grand) ^ 2
+ss.fficf = (mean.fficf - mean.grand) ^ 2
+
+control.n = nrow(subset(sl.sim, Group == "Control"))
+ffi.n = nrow(subset(sl.sim, Group == "FFI"))
+fficf.n = nrow(subset(sl.sim, Group == "FFI+CF"))
+
+ss.between = control.n * ss.control + ffi.n * ss.ffi + fficf.n * ss.fficf
+
+control.rF3 = sl.sim[sl.sim$Group == "Control",]$rF3
+ffi.rF3 = sl.sim[sl.sim$Group == "FFI",]$rF3
+fficf.rF3 = sl.sim[sl.sim$Group == "FFI+CF",]$rF3
+
+ss.control.within = sum((control.rF3 - mean.control) ^ 2)
+ss.ffi.within = sum((ffi.rF3 - mean.ffi) ^ 2)
+ss.fficf.within = sum((fficf.rF3 - mean.fficf) ^ 2)
+
+ss.within = sum(ss.control.within, ss.ffi.within, ss.fficf.within)
+
+sl.sim.sub = subset(sl.sim, Group != "FFI+CF")
+sl.sim.sub.aov = aov(formula = rF3 ~ Group, data = sl.sim.sub)
+summary(sl.sim.sub.aov)
+
+t.test(formula = rF3 ~ Group, data = sl.sim.sub, var = TRUE)
+
+TukeyHSD(sl.sim.aov)
+
+sl.rep.sim = loadCourseCSV(week = "Week10-11", 
+                           file = "SaitoLysterRepSim.csv")
+
+sl.rep.avg = aggregate(rF3 ~ Subject + Condition, FUN = mean, 
+                       data = sl.rep.sim)
+
+sl.rep.aov = aov(formula = rF3 ~ Condition, data = sl.rep.avg)
+summary(sl.rep.aov)
+
+sl.rep.avg$Subject = as.factor(sl.rep.avg$Subject)
+sl.rep.aov.good = aov(formula = rF3 ~ Condition + 
+                        Error(Subject / Condition), data = sl.rep.avg)
+summary(sl.rep.aov.good)
+
+TukeyHSD(sl.rep.aov.good)
+
+alpha = .05 / 3
+
+sl.cl.ffi = subset(sl.rep.avg, Condition != "FFI+CF")
+t.test(formula = rF3 ~ Condition, paired = T, data = sl.cl.ffi)
+
+sl.cl.fficf = subset(sl.rep.avg, Condition != "FFI")
+t.test(formula = rF3 ~ Condition, paired = T, data = sl.cl.fficf)
+
+sl.ffi.fficf = subset(sl.rep.avg, Condition != "Control")
+t.test(formula = rF3 ~ Condition, paired = T, data = sl.ffi.fficf)
