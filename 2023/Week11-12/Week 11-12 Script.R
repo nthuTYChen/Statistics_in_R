@@ -180,3 +180,31 @@ t.test(formula = rF3 ~ Condition, paired = T, data = sl.cl.fficf)
 sl.ffi.fficf = subset(sl.rep.avg, Condition != "Control")
 t.test(formula = rF3 ~ Condition, paired = T, data = sl.ffi.fficf)
 # p < .0167
+
+chen.sample = loadCourseCSV("Week10-11", "Chen2020Sample.csv")
+
+chen.aov = aov(formula = Accept ~ Group * InitialTone, 
+               data = chen.sample)
+
+summary(chen.aov)
+
+xtabs(~ Group + InitialTone, data = chen.sample)
+
+aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
+
+aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
+aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
+
+1536 * (0.4602865 - 0.4947917 - 0.5361328 + 0.511566) ^ 2 +
+  1536 * (0.6119792 - 0.5283203 - 0.5361328 + 0.511556) ^ 2 +
+  1536 * (0.5292969 - 0.4947917 - 0.4869792 + 0.511556) ^ 2 +
+  1536 * (0.4446615 - 0.5283203 - 0.4869792 + 0.511556) ^ 2
+
+chen.aov.2 = aov(Accept ~ InitialTone * Group, data = chen.sample)
+summary(chen.aov.2)
+
+chen.sample.2 = chen.sample[-1, ]
+xtabs(~ Group + InitialTone, data = chen.sample.2)
+
+chen.aov.3 = aov(Accept ~ Group * InitialTone, data = chen.sample.2)
+chen.aov.4 = aov(Accept ~ InitialTone * Group, data = chen.sample.2)
