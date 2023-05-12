@@ -181,30 +181,69 @@ sl.ffi.fficf = subset(sl.rep.avg, Condition != "Control")
 t.test(formula = rF3 ~ Condition, paired = T, data = sl.ffi.fficf)
 # p < .0167
 
+# Load the sample dataset of Chen (2020); check the course handout
+# for the explanation.
 chen.sample = loadCourseCSV("Week10-11", "Chen2020Sample.csv")
 
+# A two-way independent-measure ANOVA that explains the acceptance rate
+# by learner group and the initial tone of a test item as well as their 
+# interaction.
+# Note once again that in this example, the dependent variable is a binary-coded
+# acceptability of test items (0 = unacceptable, 1 = acceptable). Keep in mind
+# that normally you should only use ANOVA for the analysis of a continuous 
+# dependent variable.
 chen.aov = aov(formula = Accept ~ Group * InitialTone, 
                data = chen.sample)
 
+# Get the output of the two-way ANOVA; main effects and the interaction
+# are all significant. Check the handout to link the effects to the visualized
+# data in Figure 4.
 summary(chen.aov)
 
+# All the cross-overs between Group and Initial Tone has 1536 data points -
+# a fully balanced dataset.
 xtabs(~ Group + InitialTone, data = chen.sample)
 
+# Calculate the average acceptance rate for each of the four cross-overs
+# between the two independent variables. Try to link the numbers to the results
+# of the two-way ANOVA above.
 aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
 
+# Calculate the average acceptance rate for each of the two groups. 
+# Try to link the numbers to the results of the two-way ANOVA above.
 aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
+# Calculate the average acceptance rate for each of the two levels in 
+# InitialTone.  Try to link the numbers to the results of the two-way 
+# ANOVA above.
 aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
 
+# Calculate the variance for each cross-over following the formula in the
+# handout
+# Group = NonFinalH, InitialTone = H
 1536 * (0.4602865 - 0.4947917 - 0.5361328 + 0.511566) ^ 2 +
+  # Group = NonFinalR, InitialTone = H
   1536 * (0.6119792 - 0.5283203 - 0.5361328 + 0.511556) ^ 2 +
+  # Group = NonFinalH, InitialTone = R
   1536 * (0.5292969 - 0.4947917 - 0.4869792 + 0.511556) ^ 2 +
+  # Group = NonFinalR, InitialTone = R
   1536 * (0.4446615 - 0.5283203 - 0.4869792 + 0.511556) ^ 2
+# When you sum all these variances together, you get the Sum Sq for the
+# two-way interaction in the two-way ANOVA
 
+# With a fully balanced dataset, the order of independent variables does not
+# influence the F statistics.
 chen.aov.2 = aov(Accept ~ InitialTone * Group, data = chen.sample)
 summary(chen.aov.2)
 
+# Remove the first row from the original dataset.
 chen.sample.2 = chen.sample[-1, ]
+# Missing one data point from one of the four cross-overs - it is no longer
+# a perfectly balanced dataset.
 xtabs(~ Group + InitialTone, data = chen.sample.2)
 
+# Now the order of the two independent variables matters as there are some
+# minor changes in the F statistics. Check the handout for a detailed 
+# explanation of why this happens, and make sure to keep this in mind if you
+# need to run any ANOVA in the future.
 chen.aov.3 = aov(Accept ~ Group * InitialTone, data = chen.sample.2)
 chen.aov.4 = aov(Accept ~ InitialTone * Group, data = chen.sample.2)
