@@ -42,3 +42,38 @@ plot(freq.pred$Frequency, freq.pred$Dur.Pred,
      main = "Predict Prefix Nasal Duration by log Word Frequency", 
      xlab = "log Word Frequency", ylab = "Predicted Prefix Nasal Duration (s)",
      ylim = c(0, 0.1))
+
+dur.lm.int = lm(DurationPrefixNasal ~ 1, data = durationsOnt)
+summary(dur.lm.int)
+
+mean(durationsOnt$DurationPrefixNasal)
+
+model.res = dur.lm$residuals
+model.sse = sum(model.res ^ 2)
+model.sse
+
+null.res = dur.lm.int$residuals
+null.sse = sum(null.res ^ 2)
+null.sse
+
+model.sse / null.sse
+1 - model.sse / null.sse
+
+nas.dur = durationsOnt$DurationPrefixNasal
+durationsOnt$DurPrefixN.z = (nas.dur - mean(nas.dur)) / sd(nas.dur)
+freq = durationsOnt$Frequency
+durationsOnt$Freq.z = (freq - mean(freq)) / sd(freq)
+
+dur.lm.z = lm(DurPrefixN.z ~ Freq.z, data = durationsOnt)
+summary(dur.lm.z)
+
+xtabs(~ PlosivePresent, data = durationsOnt)
+
+durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
+contrasts(durationsOnt$Pl.Pr.Fac)
+
+dur.lm.plo = lm(DurationPrefixNasal ~ Pl.Pr.Fac, data = durationsOnt)
+summary(dur.lm.plo)
+
+t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, 
+       data = durationsOnt)
