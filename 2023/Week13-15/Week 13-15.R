@@ -43,37 +43,75 @@ plot(freq.pred$Frequency, freq.pred$Dur.Pred,
      xlab = "log Word Frequency", ylab = "Predicted Prefix Nasal Duration (s)",
      ylim = c(0, 0.1))
 
+# Create a "null model" in which only intercept is included (i.e., the "1" part)
+# In this model, the intercept is the mean of all data points, since mean is
+# a number that is "at the center" of all data points.
 dur.lm.int = lm(DurationPrefixNasal ~ 1, data = durationsOnt)
 summary(dur.lm.int)
 
+# You get the same number of the intercept by calculating the mean
 mean(durationsOnt$DurationPrefixNasal)
 
+# In a linear regression model, the unexplained variance is the differences
+# between individual data points and their predicted values, which are stored
+# in the "residuals" list of the model.
 model.res = dur.lm$residuals
+# Square the differences and sum them together, you get a sum of squared errors.
 model.sse = sum(model.res ^ 2)
 model.sse
 
+# We can also get the differences between a mean and all individual data points
+# to calculate the sum of squared errors in the null model.
 null.res = dur.lm.int$residuals
 null.sse = sum(null.res ^ 2)
 null.sse
 
-model.sse / null.sse
+# r2, which is the effect size in a linear model, is calculated by comparing
+# the SSE in our model incoporating an independent variable to the SSE in the
+# null model to see if our model with the independent variable give rises to
+# a smaller SSE, meaning more variance is explained.
+model.sse / null.sse # About 97.6%
+# r2 is 1 minus the proportion above, so more 2.4% variance in the null model
+# is explained by our model incorporating frequency as a predictor. It's a 
+# very small effect size.
 1 - model.sse / null.sse
 
+# In another attempt, we try to have a standardized beta coefficient in linear
+# regression, which means we need to convert both of our dependent and 
+# independent variables into z-scores. In this case, 0 on each scale is not
+# "nothing" but the mean of the variable.
 nas.dur = durationsOnt$DurationPrefixNasal
 durationsOnt$DurPrefixN.z = (nas.dur - mean(nas.dur)) / sd(nas.dur)
 freq = durationsOnt$Frequency
 durationsOnt$Freq.z = (freq - mean(freq)) / sd(freq)
 
+# The t-value and the p-value of the frequency effect is still the same,
+# because covariance does not change with z-scores. (Do you still remember that
+# in Pearson's correlation coeffient, two correlated continuous variables are
+# also converted into z-scores first?)
 dur.lm.z = lm(DurPrefixN.z ~ Freq.z, data = durationsOnt)
 summary(dur.lm.z)
 
+# Moving on to linear regression with a "fixed predictor", that is, a predictor
+# that only has fixed number of levels. In "PlosivePresent", there are only two
+# levels "yes" and "no", which means whether [t] in the ont- prefix is produced
+# in an ont-word or not. See the handout for my explanation of the hypothesis
+# to be tested here.
 xtabs(~ PlosivePresent, data = durationsOnt)
 
+# We need to convert PlosivePresent into a real factor first with as.factor()
+# so the values in the variable could be treated as levels rather than strings.
 durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
+# Check my handout to see how to interpret this contrast table.
 contrasts(durationsOnt$Pl.Pr.Fac)
 
+# Linear regression modeling with a fixed predictor. Check my handout for 
+# detailed explanations.
 dur.lm.plo = lm(DurationPrefixNasal ~ Pl.Pr.Fac, data = durationsOnt)
 summary(dur.lm.plo)
 
+# If you run a two-sample unpaired t-test assuming an equal variance, you get
+# the same t-value, df, and the p-value. So, a t-test is just a special form
+# of linear regression. For other details, see my handout.
 t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, 
        data = durationsOnt)
