@@ -115,3 +115,62 @@ summary(dur.lm.plo)
 # of linear regression. For other details, see my handout.
 t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, 
        data = durationsOnt)
+
+contrasts(durationsOnt$Pl.Pr.Fac) = contr.sum(2)
+levels(durationsOnt$Pl.Pr.Fac)
+colnames(contrasts(durationsOnt$Pl.Pr.Fac)) = 
+  levels(durationsOnt$Pl.Pr.Fac)[2]
+
+dur.lm.plo.sum = lm(formula = DurationPrefixNasal ~ Pl.Pr.Fac,
+                    data = durationsOnt)
+summary(dur.lm.plo.sum)
+
+library(languageR)
+english.sub = subset(english, WordCategory == "N")
+nrow(english.sub)
+
+english.sub = english.sub[c("RTlexdec", "NounFrequency", 
+                            "Familiarity", "Word")]
+head(english.sub)
+
+english.sub$NounFreq.log = log(english.sub$NounFrequency + 1)
+
+freq.mean = mean(english.sub$NounFreq.log)
+freq.sd = sd(english.sub$NounFreq.log)
+fam.mean = mean(english.sub$Familiarity)
+fam.sd = sd(english.sub$Familiarity)
+
+tail(subset(english.sub, NounFreq.log < freq.mean - freq.sd & 
+              Familiarity > fam.mean + fam.sd))
+
+english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
+summary(english.lm.freq)
+
+english.lm.fam = lm(RTlexdec ~ Familiarity, data = english.sub)
+summary(english.lm.fam)
+
+english.lm.noint = lm(RTlexdec ~ NounFreq.log + Familiarity,
+                      data = english.sub)
+summary(english.lm.noint)
+
+english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, 
+                    data = english.sub)
+summary(english.lm.int)
+
+cor(english.sub$NounFreq.log, english.sub$Familiarity)
+
+set.seed(100)
+x = rnorm(n = 50)
+set.seed(50)
+y = 10 + 3 * x + rnorm(n = 50)
+summary(lm(y ~ x))
+
+set.seed(200)
+x2 = x - rnorm(50) * 0.1
+
+cor(x, x2)
+
+summary(lm(y ~ x2))
+
+coll.lm = lm(y ~ x + x2)
+summary(coll.lm)
