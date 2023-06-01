@@ -116,61 +116,127 @@ summary(dur.lm.plo)
 t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, 
        data = durationsOnt)
 
+# Turn the PlosivePresent factor into a categorical variable with the sum-coded
+# contrasts; that is, all levels sum to 0 after being converted into numbers.
+# This can be done using the contr.sum() function, and the number specifies how
+# many levels there are in the factor. 
 contrasts(durationsOnt$Pl.Pr.Fac) = contr.sum(2)
+# Here we only have TWO levels in the factor, namely "yes" and "no".
 levels(durationsOnt$Pl.Pr.Fac)
+# The column names of the contrast table should be changed to the second level
+# of the two levels. The reason is that the first level "no" is still the 
+# default or reference level, and our regression modeling is testing the effect
+# of non-reference levels, which is the second level "yes" in the current case.
 colnames(contrasts(durationsOnt$Pl.Pr.Fac)) = 
   levels(durationsOnt$Pl.Pr.Fac)[2]
 
+# Run linear regression with the sum-coded categorical predictor
 dur.lm.plo.sum = lm(formula = DurationPrefixNasal ~ Pl.Pr.Fac,
                     data = durationsOnt)
+# Check the Week 13-14 handouts for how to interpret the statistics in the model
 summary(dur.lm.plo.sum)
 
+# Multiple linear regression: More than one predictors
 library(languageR)
+# We focus on the naming latency of nouns in the "english" dataset of the 
+# "languageR" package
 english.sub = subset(english, WordCategory == "N")
+# Around 2,900 observations.
 nrow(english.sub)
 
+# Leave variables/columns that are crucial to our multiple linear regression
+# modeling.
 english.sub = english.sub[c("RTlexdec", "NounFrequency", 
                             "Familiarity", "Word")]
 head(english.sub)
 
+# We only have raw noun frequencies in the dataset, so we have to log-transform
+# it first for a normally distributed predictor. We have to add 1 to all raw
+# noun frequencies before log-transformation since some nouns have a frequency of
+# 0 in the entire corpus, and log(0) = -infinity, which would cause problems when
+# calculating statistics.
 english.sub$NounFreq.log = log(english.sub$NounFrequency + 1)
 
+# In the current case, we focus on the effect of frequency and familiarity on
+# naming latency. Although the two variables are certainly correlated, 
+# a low-frequency noun does not always entail a low familiarity.
 freq.mean = mean(english.sub$NounFreq.log)
 freq.sd = sd(english.sub$NounFreq.log)
 fam.mean = mean(english.sub$Familiarity)
 fam.sd = sd(english.sub$Familiarity)
 
+# We can get a few examples with a log-frequency lower than mean-1SD but 
+# with a familiarity higher than mean+1SD. Thus, the two predictors would
+# still have their independent effects.
 tail(subset(english.sub, NounFreq.log < freq.mean - freq.sd & 
               Familiarity > fam.mean + fam.sd))
 
+# A simple linear regression testing the effect of noun frequency alone,
+# and about 18% more variance is explained than in the null model.
 english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
 summary(english.lm.freq)
 
+# A simple linear regression testing the effect of familiarity alone,
+# and about 20% more variance is explained than in the null model.
 english.lm.fam = lm(RTlexdec ~ Familiarity, data = english.sub)
 summary(english.lm.fam)
 
+# A multiple linear regression testing the additive effect of noun
+# frequency and familiarity without testing their interaction. Both
+# "negative" effects are significant, and about 22% more variance is
+# explained than in the null model.
 english.lm.noint = lm(RTlexdec ~ NounFreq.log + Familiarity,
                       data = english.sub)
 summary(english.lm.noint)
 
+# A multiple linear regression testing the interactive effect of
+# noun frequency and familiarity. Both negative main effects 
+# remain significant, and the interaction between the two predictors
+# is also significant - the negative main effect of noun frequency
+# is weaker as familiarity increases. Overall, 24% more variance is
+# explained than in the null model, the most of all four models we
+# have created.
 english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, 
                     data = english.sub)
 summary(english.lm.int)
 
+# As explained earlier, noun frequency and familiarity
+# are highly correlated, so we have the "collinearity"
+# issue in linear regression modeling. Why? If a dependent
+# variable is correlated to both of the predictors, and
+# the two predictors are also correlated, then which 
+# predictor can really explain the dependent variable?
 cor(english.sub$NounFreq.log, english.sub$Familiarity)
 
+# Try to demonstrate that collinearity is a potential issue.
 set.seed(100)
+# Randomly sample 50 values from a default normal distribution
+# as a predictor x
 x = rnorm(n = 50)
 set.seed(50)
+# Create a dependent variable y based on x
 y = 10 + 3 * x + rnorm(n = 50)
+# Since the two variables must be highly correlated, a linear
+# regression would suggest a significant main effect of x on y.
 summary(lm(y ~ x))
 
-set.seed(200)
+# Create another predictor x2 based on x
+set.seed(150)
 x2 = x - rnorm(50) * 0.1
 
+# Since x2 is based on x, the two predictors must be highly
+# correlated.
 cor(x, x2)
 
+# Since y is based on x, and x2 is also based x, a linear
+# regression including x2 as the only predictor would suggest
+# a significant main effect of x2, too.
 summary(lm(y ~ x2))
 
+# Now, include both highly correlated predictors in the same
+# linear regression model, none of them is significant.
+# Check the handout to see how to identify this problem, since
+# in the field of linguistics, predictors are usually correlated
+# in some way.
 coll.lm = lm(y ~ x + x2)
 summary(coll.lm)
