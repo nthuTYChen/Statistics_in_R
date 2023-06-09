@@ -84,7 +84,7 @@ summary(lexdec.lm3)
 # According to the interaction coefficient, the negative effect of Frequency on RT
 # decreases only by 0.006 (since the cofficient is negative) when FamilySize 
 # increases by 1. And with the large p-value, we can conclude that the significant
-# effect of Frequenct is not depenedent on FamilySize.
+# effect of Frequency is not dependent on FamilySize.
 
 # Task VIII
 # Just follow the linear equation y = b0 + b1x1 + b2x2 + b3x1x2. The rest is the
