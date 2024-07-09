@@ -2,6 +2,6 @@ set.seed(100)
 
 dist.norm = rnorm(100, 50, 5)
 
-dist.skewR = dist.norm ^ 4
+dist.skewR = exp(dist.norm)
 
-dist.skewL = 1 / dist.skewR ^ 4
+dist.skewL = log(dist.skewL)
