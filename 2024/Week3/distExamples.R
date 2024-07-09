@@ -4,4 +4,4 @@ dist.norm = rnorm(100, 50, 5)
 
 dist.skewR = exp(dist.norm)
 
-dist.skewL = log(dist.skewL)
+dist.skewL = 1 / exp(dist.skewL)
