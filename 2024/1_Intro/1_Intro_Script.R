@@ -1,69 +1,37 @@
-# A simple statement
-1 + 2
+# To set my working directory
+setwd("~/GitHub/Statistics_in_R/2024/1_Intro")
 
-# A long statement
-(235678 / 1729 + 25)^2 * 1000 + 50 * 1.5-29 / 77^3 + 99 * 20* 65 / 4-1 + 1550
+1 + 2 # Need to add proper spacing
+#1+2  # No spacing makes your codes less readable
 
-# There are two lines below, but it is one statement
-(235678 / 1729 + 25)^2 * 1000 + 50 * 
-  1.5-29 / 77^3 + 99 * 20* 65 / 4-1 + 1550
+# Multi-line statement
+# The second line of a multi-line statement is indented to increase readability
+(235678 / 1729 + 25) ^ 2 * 1000 + 50 * 1.5 - 
+  29 / 77 ^ 3 + 99 * 20 * 65 / 4 - 1 + 1550
 
-# Create a variable called "num", and
-# assign a value to it, which is the result of 1 + 3
+# Variable
+num = 1
+num2 <- 2
+
+num
+
+#Num # Case-sensitive: It is different from 'num'
+
 num = 1 + 3
 
-# Replace the value of "num" with the result of 1 - 3
-num = 1 - 3
-
-# The equal sign "=" has an alternative, which is "<-"
-num <- 1 + 3
-
-# Create a variable "nums", which stores a vector with
-# a sequence of numeric values from 6 to 15
+# Vector
 nums = 6:15
+manyNums = 10:90
 
-# Get the first value of the vector
-nums[1]
-# Get the seventh value of the vector
-nums[7]
+nums[3]
+nums[3:5]
+nums[c(3, 5, 7)]
+manyNums[c(3:5, 10:12, 20:22)]
 
-# Replace the second value of the vector with the numeric value 3
-nums[2] = 3
+# String
+string = "This is a string!"
+string
 
-# Strings have to be enclosed inside a pair of double-quotation marks
-str = "This is a string"
-
-# Store the link to my course material folder for Week 1
-resourcesURL = "https://lngproc.hss.nthu.edu.tw/statisticsR/Week1/"
-
-# Load a CSV file into R as a data frame (df)
-# from the folder with the file name "dummyDataFrame.csv"
-df = read.csv(paste(resourcesURL, "dummyDataFrame.csv", sep = ""))
-
-# If only one number is enclosed inside [] for a data frame,
-# it represents a column number, and this line gets you all the
-# values of the first column/factor (the output is still a data frame)
-df[1]
-
-# You can also place a string inside [] for a data frame, which
-# represents the name of a column/factor. This line retrieves all
-# the values of the Age column (the output is still a data frame).
-df["Age"]
-
-# With a $ sign, you can also retrieve the values of a column based on
-# the name of the column (the output is a vector).
-df$Age
-
-# Get the value from the second column of the first row.
-df[1, 2]
-
-# Get all the columns of the first row
-df[1, ]
-
-# Get the "Age" column of the first row
-df[1, "Age"]
-
-# Get all the columns of the first row, and then get all the values
-# of the Age column of the extract row (the output is the same as that of 
-# line 64).
-df[1, ]$Age
+strings = c("This is the first string!", "This is the second string!")
+strings[1]
+strings[2]
