@@ -60,3 +60,67 @@ abline(v = mean(dist.norm), col = "red", lwd = 1.5)
 # Ditto, except that the point on the x-axis where the vertical line falls is
 # based on the median of the distribution.
 abline(v = median(dist.norm), col = "blue", lwd = 1.5)
+
+range(dist.norm)
+median(dist.norm)
+mean(dist.norm)
+
+summary(dist.norm)
+
+IQR(dist.norm)
+
+# Standard Deviation
+dist.norm.diff = dist.norm - mean(dist.norm)
+
+sum(dist.norm.diff)
+
+dist.norm.diff.sq = dist.norm.diff ^ 2
+
+ss.norm = sum(dist.norm.diff.sq)
+
+ss.norm / length(dist.norm)
+
+var(dist.norm)
+
+ss.norm / (length(dist.norm) - 1)
+
+sd.norm = sqrt(ss.norm / (length(dist.norm) - 1))
+
+sd(dist.norm)
+
+mean(dist.norm) + sd(dist.norm)
+mean(dist.norm) - sd(dist.norm)
+
+dist.norm.den = density(dist.norm)
+plot(dist.norm.den, main = "(Near-)Normal Distribution")
+abline(v = mean(dist.norm), col = "red", lwd = 1.5)
+abline(v = median(dist.norm), col = "blue", lwd = 1.5)
+abline(v = mean(dist.norm) + sd(dist.norm), col = "green", lwd = 1.5, lty = 2)
+abline(v = mean(dist.norm) - sd(dist.norm), col = "green", lwd = 1.5, lty = 2)
+
+set.seed(1)
+nums = rnorm(n = 100, mean = 10, sd = 2)
+noise = runif(n = 100)
+nums.noi = nums * noise
+range(nums.noi)
+nums.mean = mean(nums.noi)
+nums.sd = sd(nums.noi)
+
+nums.d = density(nums.noi)
+plot(nums.d, main = "Sample vs. Theoretical Distribution")
+
+range.seq = seq(from = -5, to = 15, by = 0.01)
+
+range.seq.d = dnorm(x = range.seq, mean = nums.mean, sd = nums.sd)
+
+lines(x = range.seq, y = range.seq.d, col = "purple", lwd = 2)
+
+qqnorm(dist.norm)
+qqline(dist.norm, col = "red")
+
+pnorm(q = -1.96)
+
+pnorm(q = 1.96)
+1 - pnorm(q = 1.96)
+
+pnorm(q = 1.96, lower.tail = FALSE)
