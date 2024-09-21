@@ -33,10 +33,10 @@ head(verbs[2])
 lastRow = nrow(verbs)
 lastRow
 # [1] 903
-firstRow = lastRow - 10
+firstRow = lastRow - 9 # The last row is also one of the last ten rows
 firstRow
-# [1] 893
-verbs[893:903,]$LengthOfTheme
+# [1] 894
+verbs[894:903,]$LengthOfTheme
 # [1] 0.0000000 1.6094379 2.5649494 0.6931472 2.3978953 1.0986123 1.0986123 1.7917595 0.0000000 1.3862944 1.0986123
 
 # This method is even better, because the number of rows could be different 
