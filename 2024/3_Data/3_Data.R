@@ -197,3 +197,103 @@ durationsOnt[outliers, 1:7]
 durationsOnt$Freq.raw = exp(durationsOnt$Frequency)
 # Show the first six raw frequencies
 head(durationsOnt$Freq.raw)
+
+plot(density(durationsOnt$Freq.raw))
+
+log(c(0.5, 1, 2, 4, 8))
+log(c(200, 400, 800))
+
+plot(density(durationsOnt$Frequency))
+
+durationsOnt$Freq.cat = ifelse(test = durationsOnt$Frequency >= 
+                                 median(durationsOnt$Frequency),
+                               yes = "High", no = "Low")
+
+aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = mean, data = durationsOnt)
+
+aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = sd, data = durationsOnt)
+
+# Pearson's correlation coefficient
+cor(durationsOnt$Frequency, durationsOnt$DurationOfPrefix)
+
+Myers.sample = loadCourseCSV(2024, "3_Data", "Myers_2015_Sample.csv")
+
+Myers.noResp = subset(Myers.sample, RT == 0)
+Myers.noResp
+nrow(Myers.noResp)
+
+Myers.resp = subset(Myers.sample, RT > 0)
+nrow(Myers.resp)
+
+Myers.noShortRT = subset(Myers.resp, RT > 200)
+nrow(Myers.resp) - nrow(Myers.noShortRT)
+
+plot(density(Myers.noShortRT$RT))
+
+Myers.noShortRT$logRT = log(Myers.noShortRT$RT)
+plot(density(Myers.noShortRT$logRT))
+
+Myers.logRT.mean = mean(Myers.noShortRT$logRT)
+Myers.logRT.sd = sd(Myers.noShortRT$logRT)
+
+Myers.sd25 = subset(Myers.noShortRT, 
+                    logRT > Myers.logRT.mean - Myers.logRT.sd * 2.5 &
+                      logRT < Myers.logRT.mean + Myers.logRT.sd * 2.5)
+
+nrow(Myers.noShortRT) - nrow(Myers.sd25)
+
+Myers.acc = aggregate(x = Response ~ ItemID + Item_ZhuyinFuhao, 
+                      FUN = mean, data = Myers.sd25)
+
+acc.row.sorted = order(Myers.acc$Response, decreasing = T)
+Myers.acc.ord = Myers.acc[acc.row.sorted,]
+head(Myers.acc.ord)
+tail(Myers.acc.ord)
+
+cor(Myers.sd25$Response, Myers.sd25$Session)
+
+aggregate(Response ~ Session + Participant, FUN = mean, data = Myers.sd25)
+
+#head(jabberwocky.wd)
+#head(jabberwocky.table)
+
+jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
+
+barplot(height = jabberwocky.table.2, ylim = c(0, 20),
+        main = "Jabberwocky Word Count (Token Freq > 1)", xlab = "",
+        ylab = "Count", las = 2)
+
+#head(jabberwocky.all)
+#jabberwocky.xtabs
+
+mosaicplot(x = jabberwocky.xtabs, main = "Jabberwocky Word Types Distribution",
+           xlab = "Read Word", ylab = "Word Category", 
+           color = c("white", "grey40"))
+
+# head(Myers.resp)
+Myers.resp$logRT = log(Myers.resp$RT)
+
+boxplot(logRT ~ Session, data = Myers.resp, 
+        main = "Wordlikeness Judgment Latency", xlab = "Session",
+        ylab = "log-transformed Reaction Times", ylim = c(0, 10))
+
+#library(languageR)
+#head(durationsOnt)
+
+plot(DurationOfPrefix ~ Frequency, data = durationsOnt, 
+     main = "Frequency-Duration Correlation in durationsOnt",
+     xlab = "log Word Frequency per Million Words", 
+     ylab = "ont- Prefix Duration (s)", ylim = c(0, 0.3))
+
+dursOnt.m = subset(durationsOnt, Sex == "male")
+dursOnt.f = subset(durationsOnt, Sex == "female")
+
+plot(DurationOfPrefix ~ Frequency, data = dursOnt.m,
+     main = "Frequency-Duration Correlation by Gender",
+     xlab = "log Word Frequency per Million Words",
+     ylab = "ont- Prefix Duration (s)", xlim = c(0, 7), ylim = c(0, 0.3))
+
+points(DurationOfPrefix ~ Frequency, data = dursOnt.f, pch = 2, col = "red")
+
+legend(title = "Sex", legend = c("Male", "Female"), pch = c(1, 2), 
+       col = c("black", "red"), x = "bottom", ncol = 2, bty = "n", cex = 0.8)
