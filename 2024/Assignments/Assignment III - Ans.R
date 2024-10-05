@@ -54,16 +54,16 @@ qqline(length.sam, col = "red")
 # First, calculate the SD of LengthOfTheme manually.
 # Get the mean
 LOT.mean = mean(verbs.ord$LengthOfTheme)
+# Calculate the differences between the mean and the individual data points
+LOT.diffs = verbs.ord$LengthOfTheme - LOT.mean
 # Calculate the sum of squares
-LOT.SS = sum((verbs.ord$LengthOfTheme - LOT.mean)  ^ 2)
+LOT.SS = sum((LOT.diffs)  ^ 2)
 # Get the SD
 LOT.sd = sqrt(LOT.SS / (nrow(verbs.ord) - 1))
 
 # Validate the SD
 sd(verbs.ord$LengthOfTheme)
 
-# Get the differences between individual values and the mean again
-LOT.diffs = verbs.ord$LengthOfTheme - LOT.mean
 # Convert the differences into SDs by dividing everything with the SD
 LOT.sds = LOT.diffs / LOT.sd
 # Save the new SD vector into verbs.ord
