@@ -415,3 +415,50 @@ points(DurationOfPrefix ~ Frequency, data = dursOnt.f, pch = 2, col = "red")
 
 legend(title = "Sex", legend = c("Male", "Female"), pch = c(1, 2), 
        col = c("black", "red"), x = "bottom", ncol = 2, bty = "n", cex = 0.8)
+
+library(ggplot2)
+
+jabberwocky.2.df = as.data.frame(jabberwocky.table.2)
+colnames(jabberwocky.2.df) = c("Word", "Count")
+
+rows.ord = order(jabberwocky.2.df$Count, decreasing = T)
+jabberwocky.2.df.ord = jabberwocky.2.df[rows.ord,]
+
+ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Word, y = Count)) +
+  geom_bar(stat = "identity") + coord_flip() + 
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) +
+  scale_x_discrete(limits = jabberwocky.2.df.ord$Word) +
+  labs(x = "Word", y = "Token Frequency", title = "Jabberwocky Corpus",
+       caption = "Token Frequency > 1") + theme_bw()
+
+jabberwocky.2.df.ord$Frequency = ifelse(jabberwocky.2.df.ord$Count > 2, "> 2", "= 2")
+
+ggplot(data = jabberwocky.2.df.ord, 
+       mapping = aes(x = Word, y = Count, fill = Frequency)) +
+  geom_bar(stat = "identity") + coord_flip() + 
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) +
+  scale_x_discrete(limits = jabberwocky.2.df.ord$Word) +
+  scale_fill_brewer(palette = "YlGnBu") +
+  labs(x = "Word", y = "Token Frequency", title = "Jabberwocky Corpus",
+       caption = "Token Frequency > 1") + theme_bw()
+
+Myers.resp$Session.fac = as.factor(Myers.resp$Session)
+
+ggplot(data = Myers.resp, mapping = aes(x = Session.fac, y = logRT)) +
+  geom_point(mapping = aes(color = Session.fac), alpha = 0.1, 
+             position = position_jitterdodge(jitter.width = 1)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  scale_y_continuous(limits = c(0, 10)) +
+  labs(title = "Wordlikeness Judgment Latency", 
+       caption = "Whiskers = IQR * 1.5 from 1st/3rd Quartile", x = "Session",
+       y = "log-transformed Reaction Time") + 
+  guides(color = "none") +
+  theme_bw()
+
+ggplot(data = durationsOnt, mapping = aes(x = Frequency, y = DurationOfPrefix)) +
+  geom_point(color = "grey40", size = 3, alpha = 0.7) +
+  facet_grid(~ Sex) + scale_y_continuous(limits = c(0, 0.3)) +
+  labs(title = "Correlation between Frequency and ont- Prefix Duration",
+       caption = "Word frequency per million is log-transformed",
+       x = "Word Frequency", y = "Durations (s)") +
+  theme_bw()
