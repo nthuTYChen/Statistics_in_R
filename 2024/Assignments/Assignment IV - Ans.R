@@ -49,21 +49,27 @@ head(verbs)
 verbs.avg.lot = aggregate(LengthOfTheme ~ Verb, FUN = mean, data = verbs)
 
 # Task II
-# Get the reordered row numbers based on LengthOfTheme values.
-theme.ordered = order(verbs.avg.lot$LengthOfTheme, decreasing = T)
+# Get the reordered row numbers based on LengthOfTheme values in INCREASING order.
+theme.ordered = order(verbs.avg.lot$LengthOfTheme)
 # Sort the data frame based on the reordered row numbers.
 verbs.ord = verbs.avg.lot[theme.ordered,]
-# Since the new data frame is ordered based on LengthOfTheme from the highest
-# average to the lowest one, the first 20 rows are the verbs that have the Top-20
+# Since the new data frame is ordered based on LengthOfTheme from the lowest
+# average to the highest one, the LAST 20 rows are the verbs that have the Top-20
 # longest theme.
-verbs.sub = verbs.ord[1:20,]
+verbs.rows = nrow(verbs.sub)
+last20row.onset = verbs.rows - 19
+verbs.sub = verbs.ord[last20row.onset:verbs.rows,]
+
+# This is easier: Show the 20 rows in the TAIL of a data frame
+verbs.sub = tail(verbs.ord, 20)
 
 # Task III
-library(ggplot2) # Don't forget to load the package
-# Check the Unit 3 handout for each function of the ggplot2 package
-ggplot(data = verbs.sub, mapping = aes(x = Verb, y = LengthOfTheme)) + 
-  geom_bar(stat = "identity") + 
-  scale_x_discrete(limits = verbs.sub$Verb) +
-  labs(x = "Dative Verbs", y = "Average Theme Length", 
-       title = "Dative Verbs and Theme Lengths in English") +
-  coord_flip() + theme_bw()
+# I actually didn't tell you how to create a bar plot using barplot() with a 
+# DATA FRAME, so this task doesn't count, unless you find your own way. In this
+# case, you get some bonus points.
+
+# The crucial part is to specify the LengthOfTheme column as "height", and
+# the Verb column as the names of each bar with "names.arg".
+barplot(height = verbs.sub$LengthOfTheme, names.arg = verbs.sub$Verb,
+        main = "Average Theme Length in English Dative Sentences", xlab = "",
+        ylab = "Average Theme Length", las = 2, ylim = c(0, 3))
