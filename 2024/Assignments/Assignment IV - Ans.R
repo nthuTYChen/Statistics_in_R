@@ -56,7 +56,7 @@ verbs.ord = verbs.avg.lot[theme.ordered,]
 # Since the new data frame is ordered based on LengthOfTheme from the lowest
 # average to the highest one, the LAST 20 rows are the verbs that have the Top-20
 # longest theme.
-verbs.rows = nrow(verbs.sub)
+verbs.rows = nrow(verbs.ord)
 last20row.onset = verbs.rows - 19
 verbs.sub = verbs.ord[last20row.onset:verbs.rows,]
 
@@ -70,6 +70,6 @@ verbs.sub = tail(verbs.ord, 20)
 
 # The crucial part is to specify the LengthOfTheme column as "height", and
 # the Verb column as the names of each bar with "names.arg".
-barplot(height = verbs.sub$LengthOfTheme, names.arg = verbs.sub$Verb,
+barplot(height = verbs.avg.lot$LengthOfTheme, names.arg = verbs.avg.lot$Verb,
         main = "Average Theme Length in English Dative Sentences", xlab = "",
         ylab = "Average Theme Length", las = 2, ylim = c(0, 3))
