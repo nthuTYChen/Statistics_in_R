@@ -84,3 +84,77 @@ for(n in 1:10) {
   diff = abs(M - 300)
   print(diff)
 }
+
+# One-sample t-test
+M = 325
+pop.mu = 300
+n = 10
+sam.sd = 40
+
+t.upper = (325 - 300) / (sam.sd / sqrt(n))
+
+t.df = n - 1
+
+p.upper = pt(q = t.upper, df = t.df, lower.tail = FALSE)
+p.upper * 2
+
+set.seed(5)
+group.sim = rnorm(n = 10, mean = 325, sd = 40)
+mean(group.sim)
+sd(group.sim)
+
+t.test(x = group.sim, mu = 300)
+
+set.seed(9)
+group2.sim = rnorm(n = 40, mean = 325, sd = 40)
+mean(group2.sim)
+sd(group2.sim)
+
+t.test(x = group2.sim, mu = 300)
+
+# Pearson's correlation test
+library(languageR)
+head(durationsOnt)
+
+dur.logFreq = durationsOnt$Frequency
+dur.prefDur = durationsOnt$DurationOfPrefix
+
+cor(dur.logFreq, dur.prefDur)
+
+dur.logFreq.m = mean(dur.logFreq)
+dur.prefDur.m = mean(dur.prefDur)
+
+dur.sp = sum((dur.logFreq - dur.logFreq.m) * 
+               (dur.prefDur - dur.prefDur.m)) / (length(dur.logFreq) - 1)
+cov(dur.logFreq, dur.prefDur)
+cov(dur.logFreq, dur.prefDur * 10)
+
+dur.logFreq.z = (dur.logFreq - dur.logFreq.m) / sd(dur.logFreq)
+dur.prefDur.z = (dur.prefDur - dur.prefDur.m) / sd(dur.prefDur)
+
+dur.sp.z = sum(dur.logFreq.z * dur.prefDur.z)
+
+r = dur.sp.z / (length(dur.logFreq.z) - 1) # = r = the output of cor()
+
+n = length(dur.logFreq.z)
+
+t = r / (sqrt(1 - r ^ 2) / sqrt(n - 2))
+p = pt(t, df = n - 2)
+p * 2
+
+cor.test(x = dur.logFreq, y = dur.prefDur)
+
+cor.test(x = durationsOnt$Frequency, y = durationsOnt$DurationPrefixVowel)
+
+plot(x = dur.logFreq, y = dur.prefDur)
+
+# Two-sample t-test
+source("https://raw.githubusercontent.com/nthuTYChen/
+       Statistics_in_R/main/courseUtil.R")
+
+Myers.clean = loadCourseCSV(2024, "4_Parametric", "MyersClean.csv")
+
+s1.rt = Myers.clean[Myers.clean$Session == 1,]$logRT
+s2.rt = Myers.clean[Myers.clean$Session == 2,]$logRT
+
+t.test(x = s1.rt, y = s2.rt, var = TRUE)
