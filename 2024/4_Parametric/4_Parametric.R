@@ -85,72 +85,147 @@ for(n in 1:10) {
   print(diff)
 }
 
-# One-sample t-test
-M = 325
-pop.mu = 300
-n = 10
-sam.sd = 40
+# One-sample t-test: Replacing the population SD, which we usually don't know,
+# with the sample SD to test the difference between the sample mean and the
+# population mean.
 
+# Let's still work on the vocabulary example.
+M = 325 # Our sample average vocabulary size
+pop.mu = 300 # The assumed population mean of vocabulary size
+n = 10 # The sample size
+sam.sd = 40 # The sample SD
+
+# Note that the calculation of the standard error has the sample SD, instead
+# of the population SD, in the numerator.
 t.upper = (325 - 300) / (sam.sd / sqrt(n))
 
+# The shape of a t-distribution and how close it is to a normal distribution
+# is determined by the sample size and the degree of freedom, which is
+# sample size minus one in one-sample t-tests.
 t.df = n - 1
 
+# Get the upper-tail probability (because of a positive difference/t-value) from
+# a corresponding t distribution using pt(). Note that the additional df parameter
+# you need in this function.
 p.upper = pt(q = t.upper, df = t.df, lower.tail = FALSE)
+# Calculate the two-tailed p-value by default, assuming that our research
+# hypothesis is never directional.
 p.upper * 2
 
+# We can also use t.test() to run a one-sample t-test for sure, but it needs
+# an actual sample, so we need to simulate a sample of 10 three-year-old 
+# children from a family of a high socio-economic status and their vocabulary
+# size.
+
+# Set a random seed so we get the same sample.
 set.seed(5)
+# Sample these 10 children from a normal distribution with a mean of 325 and
+# an SD of 40.
 group.sim = rnorm(n = 10, mean = 325, sd = 40)
+# Check the mean and the SD of the simulated sample; both numbers are close
+# to 325 and 40.
 mean(group.sim)
 sd(group.sim)
 
+# Test the sample against a normal distribution with a mean (mu) of 300.
+# The result suggests a non-significant difference. Check the Unit 4
+# handout to see how to report the result of a one-sample t-test.
 t.test(x = group.sim, mu = 300)
 
+# Run the same test with another sample of 40 children to show the importance
+# of sample size.
 set.seed(9)
 group2.sim = rnorm(n = 40, mean = 325, sd = 40)
 mean(group2.sim)
 sd(group2.sim)
 
+# The sample and SD are similar but not the same as in the smaller sample, which 
+# makes sense because it's random sampling. The difference from the population
+# mean is similar, but with more data points, the result of the test suggests
+# a significant difference.
 t.test(x = group2.sim, mu = 300)
 
-# Pearson's correlation test
+# Pearson's correlation test: Revisiting the correlation between word frequency
+# and ont- prefix duration
 library(languageR)
 head(durationsOnt)
 
+# Store the two paired samples separately as a factor to save some typing below
 dur.logFreq = durationsOnt$Frequency
 dur.prefDur = durationsOnt$DurationOfPrefix
 
+# Calculate the Pearson's correlation coefficient (r); -0.049...
 cor(dur.logFreq, dur.prefDur)
 
+# Calculate r manually; check p.10-11 of the Unit 4 handouts for the most
+# detailed explanation
+
+# The mean of each smaple
 dur.logFreq.m = mean(dur.logFreq)
 dur.prefDur.m = mean(dur.prefDur)
 
-dur.sp = sum((dur.logFreq - dur.logFreq.m) * 
+# Calculate the Sum of Products (SP) in the numerator, and divide SP by 
+# the sample size minus 1 to get the covariance. Since the two samples are
+# paired, the size is the same for both samples, and you can obtain the 
+# sample size with one of the two samples in length().
+
+# In my lecture, the object is named dur.sp, which is not appropriate, because
+# SP is represented only by the numerator. The output of the entire calculation
+# should be covariance.
+dur.cov = sum((dur.logFreq - dur.logFreq.m) * 
                (dur.prefDur - dur.prefDur.m)) / (length(dur.logFreq) - 1)
+
+# Use cov() and the raw sample data to validate the covariance
 cov(dur.logFreq, dur.prefDur)
+
+# Demonstrating the change in covariance due to a change in the scale of a
+# sample. 
 cov(dur.logFreq, dur.prefDur * 10)
 
+# The calculation of r actually use z-scores of the two paired samples; after
+# standardizing everything, the original scale does not matter.
+
+# Convert raw values into z-scores in each sample.
 dur.logFreq.z = (dur.logFreq - dur.logFreq.m) / sd(dur.logFreq)
 dur.prefDur.z = (dur.prefDur - dur.prefDur.m) / sd(dur.prefDur)
 
-dur.sp.z = sum(dur.logFreq.z * dur.prefDur.z)
+# Calculate the covariance with z-scored samples
 
-r = dur.sp.z / (length(dur.logFreq.z) - 1) # = r = the output of cor()
+# Again, I shouldn't have named the output object as dur.sp.z in my lecture.
+dur.cov.z = sum(dur.logFreq.z * dur.prefDur.z)
 
+# Calculate r
+r = dur.cov.z / (length(dur.logFreq.z) - 1) # = r = the output of cor()
+
+# Calculate r-squared (which I forgot to do in my lecture).
+r ^ 2
+# 0.002427932; only 0.2% of the variance in the data is explained by the correlation.
+
+# Store the sample size separately
 n = length(dur.logFreq.z)
 
+# Calculate the t value using a formula similar to that for an one-sample t-test
+# The numerator is in fact (r - 0).
 t = r / (sqrt(1 - r ^ 2) / sqrt(n - 2))
+# We have a weak correlation and a negative r, so we get a negative t as well.
+# Calculate the lower-tail p using pt(). Df is n - 2 in a Pearson's correlation
+# test because we have two samples.
 p = pt(t, df = n - 2)
-p * 2
+p * 2 # Not significant
 
+# Validate the r statistics using cor.test() with raw sample data.
 cor.test(x = dur.logFreq, y = dur.prefDur)
 
+# Explore the correlation between word frequency and the vowel duration in
+# the ont- prefix; still not significant.
 cor.test(x = durationsOnt$Frequency, y = durationsOnt$DurationPrefixVowel)
 
+# Use a scatter plot to check if our paired samples have a good data distribution
+# for running a Pearson's correlation test. See p.12-14 in the Unit 4 handout
 plot(x = dur.logFreq, y = dur.prefDur)
 
-# Two-sample t-test
-source("https://raw.githubusercontent.com/nthuTYChen/
-       Statistics_in_R/main/courseUtil.R")
+# Just a quick exploration of a two-sample t-test, we will be back next week
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
 
 Myers.clean = loadCourseCSV(2024, "4_Parametric", "MyersClean.csv")
 
