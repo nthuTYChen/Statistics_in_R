@@ -233,3 +233,59 @@ s1.rt = Myers.clean[Myers.clean$Session == 1,]$logRT
 s2.rt = Myers.clean[Myers.clean$Session == 2,]$logRT
 
 t.test(x = s1.rt, y = s2.rt, var = TRUE)
+
+nrow(Myers.clean)
+
+var.test.res = var.test(x = s1.rt, y = s2.rt)
+var.test.res$p.value
+
+t.test(x = s1.rt, y = s2.rt)
+
+set.seed(10)
+norm.x = rnorm(n = 100, mean = 0, sd = 1)
+set.seed(49)
+norm.y = rnorm(n = 100, mean = 0, sd = 1)
+var.test.norm = var.test(x = norm.x, y = norm.y)
+var.test.norm$p.value
+
+overgen = loadCourseCSV(2024, "4_Parametric", "overgen.csv")
+head(overgen)
+
+newRowNums = order(overgen$Subj, overgen$Age)
+overgen.ord = overgen[newRowNums,]
+head(overgen.ord)
+
+overgen.2 = subset(overgen.ord, Age == "Two")
+overgen.3 = subset(overgen.ord, Age == "Three")
+error.diff = overgen.3$ErrorN - overgen.2$ErrorN
+
+diff.mean = mean(error.diff)
+diff.sd = sd(error.diff)
+diff.se = diff.sd / sqrt(length(error.diff))
+overgen.t = diff.mean / diff.se
+
+overgen.p = pt(q = overgen.t, df = length(error.diff) - 1)
+overgen.p * 2
+
+t.test(x = overgen.3$ErrorN, y = overgen.2$ErrorN, 
+       paired = T, data = overgen.ord)
+
+set.seed(9)
+group2.sim = rnorm(n = 40, mean = 325, sd = 40)
+mean(group2.sim)
+sd(group2.sim)
+
+# The sample and SD are similar but not the same as in the smaller sample, which 
+# makes sense because it's random sampling. The difference from the population
+# mean is similar, but with more data points, the result of the test suggests
+# a significant difference.
+t.test(x = group2.sim, mu = 300)
+
+# Cohen's d
+abs(mean(group2.sim) - 300) / sd(group2.sim)
+
+# Myers (2015)
+abs(mean(s1.rt) - mean(s2.rt)) / sd(Myers.clean$logRT)
+
+# Overgeneralization
+abs(diff.mean) / diff.sd
