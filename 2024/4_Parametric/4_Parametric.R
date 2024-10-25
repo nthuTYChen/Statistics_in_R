@@ -224,23 +224,50 @@ cor.test(x = durationsOnt$Frequency, y = durationsOnt$DurationPrefixVowel)
 # for running a Pearson's correlation test. See p.12-14 in the Unit 4 handout
 plot(x = dur.logFreq, y = dur.prefDur)
 
-# Just a quick exploration of a two-sample t-test, we will be back next week
+# Use the Myers (2015) data to demonstrat two-sample t-tests
+# Load the course script first
 source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
 
+# Load the "clean" data set without RT outliers and zero RTs
 Myers.clean = loadCourseCSV(2024, "4_Parametric", "MyersClean.csv")
 
+# The working hypothesis is that due to the satiation effect, the nonword judgments
+# become significantly slower (due to hesitation) or faster (due to boredom) in
+# Session 2 than in Session 1.
+
+# Extract the two RT subsets based on the two experiment sessions
 s1.rt = Myers.clean[Myers.clean$Session == 1,]$logRT
 s2.rt = Myers.clean[Myers.clean$Session == 2,]$logRT
 
+# Run a two-sample t-test assuming an equal variance of the two samples
+# The report suggests a significant difference in logRT across the two
+# experiment sessions; crucially S2 logRT > S1RT
 t.test(x = s1.rt, y = s2.rt, var = TRUE)
 
+# Check the entire sample size to validate that df in a two-sample t-test
+# assuming an equal variance is n - 2
 nrow(Myers.clean)
 
+# However, using a two-sample t-test assuming an equal variance has to be 
+# justified with a test of equal variance, which can be done using var.test().
+# The test report could be stored separately in another object.
 var.test.res = var.test(x = s1.rt, y = s2.rt)
+# What really matters here is the p-value of the report, which is lower than
+# .05 and suggests an UNEQUAL variance between the two samples.
 var.test.res$p.value
 
+# Thus, what we really need to run to compare the two samples is in fact
+# a two-sample t-test assuming an UNEQUAL variance, aka Welch's Two-Sample
+# t-test. The var parameter is by default set to FALSE, so we don't have to
+# to specify it in t.test() to run the t-test. The test result still suggests
+# a significant difference in logRT between the two sessions. However, due to
+# an unequal variance, we obtain a smaller t-value, a smaller df, and a slightly
+# higher p-value to reflect our uncertainly when the variance is unequal.
 t.test(x = s1.rt, y = s2.rt)
 
+# Even if we just randomly sample the same number of data points from the same
+# normal distribution, two samples can differ in their variance to some extend.
+# This is probably why t.test() has var set to FALSE by default.
 set.seed(10)
 norm.x = rnorm(n = 100, mean = 0, sd = 1)
 set.seed(49)
@@ -248,44 +275,69 @@ norm.y = rnorm(n = 100, mean = 0, sd = 1)
 var.test.norm = var.test(x = norm.x, y = norm.y)
 var.test.norm$p.value
 
+# Paired t-test. Here we use overgeneralization in child language acquisition
+# as example. See pp.18-19 in the Unit 4 handout for detailed explanation.
+
+# Get the data set first.
 overgen = loadCourseCSV(2024, "4_Parametric", "overgen.csv")
+# Check the structure. The subject IDs and their ages are not properly ordered.
 head(overgen)
 
+# To run a PAIRED t-test, we need to order our data frame properly, so our
+# data points are properly PAIRED.
+
+# Use the order() function to order the row numbers firstly by Subject ID
+# and then by Age in overgen.
 newRowNums = order(overgen$Subj, overgen$Age)
+# Use the reordered row numbers to sort the original data frame and store the
+# output as overgen.ord. Now, the new data frame is ordered by Subject ID, and
+# within each subject, the error numbers are also ordered by Age.
 overgen.ord = overgen[newRowNums,]
 head(overgen.ord)
 
+# After pairing the data points, extract the two paired samples based on
+# participants' age.
 overgen.2 = subset(overgen.ord, Age == "Two")
 overgen.3 = subset(overgen.ord, Age == "Three")
+# Calculate the difference in error number for each pair of data points.
 error.diff = overgen.3$ErrorN - overgen.2$ErrorN
 
+# Calculate the mean/sd of the paired differences
 diff.mean = mean(error.diff)
 diff.sd = sd(error.diff)
+# Get the SE based on the two statistics above
 diff.se = diff.sd / sqrt(length(error.diff))
+# Get the t-value using a formula that is logically similar to a one-sample
+# t-test assuming zero as the population mean.
 overgen.t = diff.mean / diff.se
-
+# We've got a negative t, so compute the lower-tail p first in a t-distribution
+# (df = the number of paired differences minus 1)
 overgen.p = pt(q = overgen.t, df = length(error.diff) - 1)
+# Compute the two-tail p.
 overgen.p * 2
 
-t.test(x = overgen.3$ErrorN, y = overgen.2$ErrorN, 
-       paired = T, data = overgen.ord)
+# Run a paired t-test using t.test() by specifying two samples and set
+# paired as TRUE.
+t.test(x = overgen.3$ErrorN, y = overgen.2$ErrorN, paired = T)
 
+# Calculate Cohen's d to quantify the effect size, which is basically the absolute 
+# difference between two samples divided by the SD of the two samples altogether. 
+# The logic is straightforward, so please just refer to pp.23-24 in the Unit 4 handout
+# for the explanations of the demonstration below.
+
+# One-sample t-test that was run earlier in this unit
 set.seed(9)
 group2.sim = rnorm(n = 40, mean = 325, sd = 40)
 mean(group2.sim)
 sd(group2.sim)
 
-# The sample and SD are similar but not the same as in the smaller sample, which 
-# makes sense because it's random sampling. The difference from the population
-# mean is similar, but with more data points, the result of the test suggests
-# a significant difference.
 t.test(x = group2.sim, mu = 300)
 
-# Cohen's d
+# Cohen's d = 0.678; medium effect size (i.e., 0.2 < 0.678 < 0.8)
 abs(mean(group2.sim) - 300) / sd(group2.sim)
 
-# Myers (2015)
+# Two-sample t-test based on the Myers (2015) study
 abs(mean(s1.rt) - mean(s2.rt)) / sd(Myers.clean$logRT)
 
-# Overgeneralization
+# Paired t-test based on the overgeneralization example
 abs(diff.mean) / diff.sd
