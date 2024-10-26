@@ -55,26 +55,6 @@ tail(Myers.sub.avg, 20)
 #    by = "ItemID")
 
 # Task 4
-# Since we are comparing two samples of continuous values, the most appropriate
-# statistical test would be a two-sample t-test. However, we still need to decide
-# whether we need to assume an equal variance in the test by comparing the 
-# variance in the two samples using var.test().
-var.test(Myers.sub.avg[Myers.sub.avg$OnsetC == "Z",]$Response,
-    Myers.sub.avg[Myers.sub.avg$OnsetC == "p",]$Response)
-
-# In my case, the two samples have a significantly different variance, so I
-# run a Welch's two-sample t-test (assuming an unequal variance).
-t.test(Response ~ OnsetC, data = Myers.sub.avg)
-
-# Contrary to my initial observation that nonwords starting with [p] are more
-# acceptable, the t-test shows that the two sample means are not significantly
-# different from each other:
-
-# "A Welch's two-sample t-test suggests a nonsignificant difference in the mean
-# acceptability rates between nonwords that begin with [p] or [ʐ]: t(278.07) =
-# -0.052, p = .959."
-
-# Task 5
 # Load the package first
 library(ggplot2)
 
@@ -90,6 +70,18 @@ ggplot(data = Myers.sub.avg, mapping = aes(x = OnsetC, y = Response)) +
        y = "Mean Acceptability Rate", 
        caption = "Z = voiced retroflex fricative\np = voiceless aspirated bilabial stop") +
   theme_bw()
+
+# Task 5
+# Save the two subgroups into separate objects
+Myers.onset.z = subset(Myers.sub.avg, OnsetC == "Z")
+Myers.onset.p = subset(Myers.sub.avg, OnsetC == "p")
+# Show the distributional properties of mean acceptability rates using summary()
+summary(Myers.onset.z$Response)
+summary(Myers.onset.p$Response)
+# The two distributions almost perfectly overlap. They have similar means and
+# identical 1st/3rd quartiles. Thus, the two distributions do not seem to be
+# significantly different from each other, which suggests that the two groups
+# of nonwords have similar mean acceptability rates.
 
 # Part II
 # We know the assumed population mean (220), and we have our sample to calculate
