@@ -1,3 +1,5 @@
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+
 library(languageR)
 library(ggplot2)
 library(effects)
@@ -120,7 +122,7 @@ ggplot(data = durationsOnt, mapping = aes(x = Plosive.fac,
   theme_bw()
 
 # Figure 7
-Myers.withNB = read.csv("MyersWithNB.csv")
+Myers.withNB = loadCourseCSV(2024, "6_Regression", "MyersWithNB.csv")
 
 ggplot(data = Myers.withNB, mapping = aes(x = NB, y = Response)) +
   geom_point(color = "grey40", alpha = .7) +
@@ -157,8 +159,7 @@ ggplot() + geom_density(data = logOdds.df, mapping = aes(x = x), lwd = 2) +
   theme_bw()
 
 # Figure 10
-source("https://lngproc.fl.nthu.edu.tw/statisticsR/courseUtil.R")
-chen.sample = loadCourseCSV("Week10-11", "Chen2020Sample.csv")
+chen.sample = loadCourseCSV(2024, "6_Regression", "Chen2020Sample.csv")
 
 chen.sample$InitialTone_Fac = as.factor(chen.sample$InitialTone)
 chen.sample$Group_Fac = as.factor(chen.sample$Group)
