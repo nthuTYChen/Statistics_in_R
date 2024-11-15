@@ -130,77 +130,152 @@ t.test(sl.sim.fficf$rF3, sl.sim.ffi$rF3, var.equal = T)
 # lower than .05
 TukeyHSD(sl.sim.aov)
 
+# One-way repeated-measures ANOVA
+# See Unit 5 handout for the explanation of the within-subject design version
+# of Saito and Lyster's simulated data
 sl.rep.sim = loadCourseCSV(2024, "5_ANOVA", "SaitoLysterRepSim.csv")
 
+# Calculate the by-subject rF3 average. WARNING: In real life, you SHOULD NOT
+# do this because by-item variance also provides important information in
+# statistical tests. I do this only for this demo. Please refer to Appendix B
+# of the Unit 5 handout to see how to incorporate both by-subject and by-item
+# analysis in ANOVA.
 sl.rep.avg = aggregate(rF3 ~ Subject + Condition, FUN = mean, data = sl.rep.sim)
 
+# Run the independent-measures ANOVA just for comparison; this is NOT the most
+# appropriate ANOVA for a study with a within-subject design.
 sl.rep.ind.aov = aov(formula = rF3 ~ Condition, data = sl.rep.avg)
 summary(sl.rep.ind.aov)
 
+# Run the MORE APPROPRIATE repeated-measures ANOVA
+# First, convert Subject into a factor so the subject ID numbers are treated as 
+# "unit labels" rather than numeric values.
 sl.rep.avg$Subject = as.factor(sl.rep.avg$Subject)
+# Build the ANOVA model; the Error() term means "Condition is a within-subject
+# design factor, so partition out the between-subject variance across the three
+# paired samples.
 sl.aov.rep = aov(formula = rF3 ~ Condition + Error(Subject / Condition),
                  data = sl.rep.avg)
+
+# Compare the two ANOVA outputs and see the similarities and the differences.
+# See the Unit 5 handout for detailed explanations.
 summary(sl.aov.rep)
 
+# Calculate the stats in one-way repeated-measures ANOVA manually to validate
+# the numbers seen in sl.aov.rep
+
+# The global/grand mean of rF3
 mean.rep.global = mean(sl.rep.avg$rF3)
 
+# The total variance (Sum of Squares): The squared differences between
+# every single data point and the global mean
 ss.rep.total = sum((sl.rep.avg$rF3 - mean.rep.global) ^ 2)
 ss.rep.total
 
+# Get the three paired samples based on Condition
 sl.rep.cl = subset(sl.rep.avg, Condition == "Control")
 sl.rep.ffi = subset(sl.rep.avg, Condition == "FFI")
 sl.rep.fficf = subset(sl.rep.avg, Condition == "FFI+CF")
 
+# Get the size of each paired sample
 sl.rep.cl.n = nrow(sl.rep.cl)
 sl.rep.ffi.n = nrow(sl.rep.ffi)
 sl.rep.fficf.n = nrow(sl.rep.fficf)
 
+# Get the mean rF3 of each paired sample
 sl.rep.cl.mean = mean(sl.rep.cl$rF3)
 sl.rep.ffi.mean = mean(sl.rep.ffi$rF3)
 sl.rep.fficf.mean = mean(sl.rep.fficf$rF3)
 
+# Calculate the interesting variance (the between-sample SS); this part is the
+# same as in a one-way independent-measures ANOVA
 ss.rep.between = sl.rep.cl.n * (sl.rep.cl.mean - mean.rep.global) ^ 2 +
                   sl.rep.ffi.n * (sl.rep.ffi.mean - mean.rep.global) ^ 2 +
                   sl.rep.fficf.n * (sl.rep.fficf.mean - mean.rep.global) ^ 2
 ss.rep.between
 
+# Calculate the by-subject average rF3
 sl.rep.subj.mean = aggregate(rF3 ~ Subject, FUN = mean, data = sl.rep.avg)
 sl.rep.subj.mean
 
+# Calculate the between-unit (between-subject) variance; the number of levels
+# in the independent variable multiplies the sum of the squared differences
+# between each by-subject mean and the global mean.
 ss.between_unit = 3 * sum((sl.rep.subj.mean$rF3 - mean.rep.global) ^ 2)
 ss.between_unit
 
+# Subtracting ss-between-sample and ss-between-unit from ss-total to get
+# ss-error (SSE).
 ss.rep.total - ss.rep.between - ss.between_unit
 
+# TukeyHSD() doesn't work for repeated-measures ANOVA models, so it is not
+# possible to run Tukey's HSD test for post-hoc pairwise comparison.
 TukeyHSD(sl.aov.rep)
 
+# That's OK, we still have Bonferroni correction. There are three pairwise
+# comparisons (CL vs. FFI, CL vs. FFI+CF, FFI vs. FFI+CF), so the 
+# Bonferroni-corrected alpha is .05 / 3 = .016666666.....
 .05 / 3
 
+# Run PAIRED t-tests for the post-hoc pairwise comparisons
+# CL vs. FFI; not significant
 cl.ffi.t = t.test(sl.rep.cl$rF3, sl.rep.ffi$rF3, paired = T)
 cl.ffi.t$p.value
 
+# CL vs. FFI+CF; significant, just below the Bonferroni-corrected alpha
 cl.fficf.t = t.test(sl.rep.cl$rF3, sl.rep.fficf$rF3, paired = T)
 cl.fficf.t$p.value
 
+# FFI vs. FFI+CF; significant
 ffi.fficf.t = t.test(sl.rep.ffi$rF3, sl.rep.fficf$rF3, paired = T)
 ffi.fficf.t$p.value
 
+# Leave out the Control group, so the Condition now only has two levels.
+# In this case, one-way repeated-measures ANOVA is just like a PAIRED t-test
 sl.rep.aov.t = aov(rF3 ~ Condition + Error(Subject / Condition),
                    data = subset(sl.rep.avg, Condition != "Control"))
+# Check the output, and the p-value is exactly the same as in the last
+# pairwise comparison above.
 summary(sl.rep.aov.t)
 
+# If you square the t-value of the last pairwise comparison, you also get the 
+# F-value of the above repeated-measures ANOVA.
 ffi.fficf.t$statistic ^ 2
 
+# Two-way independent-measures ANOVA
+# Check the Unit 5 handout for (1) the explanations of interactions between
+# two independent variables and (2) the introduction to Chen's (2020) study
+# related to the sample data set.
 chen.sample = loadCourseCSV(2024, "5_ANOVA", "Chen2020Sample.csv")
 
+# Build a two-way independent-measures ANOVA model
 chen.aov = aov(formula = Accept ~ Group * InitialTone, data = chen.sample)
+# See also the Unit 5 handout for the detailed explanation of the output
 summary(chen.aov)
 
+# Group * InitialTone = Group + InitialTone + Group:InitialTone. Put differently,
+# the model has two main effects and a two-way interaction.
 chen.aov2 = aov(formula = Accept ~ Group + InitialTone + Group:InitialTone, 
                 data = chen.sample)
+# The output is exactly the same
 summary(chen.aov2)
 
+# This part is NOT included in the Unit 5 handout.
+# First of all, InitialTone is in fact a within-subject design factor; all
+# participants were tested with the same test items with either H or R on the
+# first syllable. So, the most correct version of ANOVA for analyzing the data
+# set is "mixed ANOVA" - one between-subject design factor (Group) and one
+# within-subject design factor (InitialTone).
+
+# First, convert the "participant" column into a factor so the participant ID
+# numbers represent "unit labels".
 chen.sample$participant = as.factor(chen.sample$participant)
+# The logic is similar to one-way repeated-measures ANOVA; using Error() to
+# specify the within-subject design variable to partition by-subject variance.
 chen.aov3 = aov(formula = Accept ~ Group * InitialTone + 
                   Error(participant / InitialTone), data = chen.sample)
+# The output is different from the one generated by the two-way 
+# independent-measures ANOVA; Group no longer has a significant mean effect.
+# It is the InitialTone and the interaction between Group and InitialTone that
+# significantly contribute to the "interesting variance".
 summary(chen.aov3)
