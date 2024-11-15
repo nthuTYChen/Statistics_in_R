@@ -129,3 +129,78 @@ t.test(sl.sim.fficf$rF3, sl.sim.ffi$rF3, var.equal = T)
 # Again, only the FFI-Control comparison does not have an adjusted p-value
 # lower than .05
 TukeyHSD(sl.sim.aov)
+
+sl.rep.sim = loadCourseCSV(2024, "5_ANOVA", "SaitoLysterRepSim.csv")
+
+sl.rep.avg = aggregate(rF3 ~ Subject + Condition, FUN = mean, data = sl.rep.sim)
+
+sl.rep.ind.aov = aov(formula = rF3 ~ Condition, data = sl.rep.avg)
+summary(sl.rep.ind.aov)
+
+sl.rep.avg$Subject = as.factor(sl.rep.avg$Subject)
+sl.aov.rep = aov(formula = rF3 ~ Condition + Error(Subject / Condition),
+                 data = sl.rep.avg)
+summary(sl.aov.rep)
+
+mean.rep.global = mean(sl.rep.avg$rF3)
+
+ss.rep.total = sum((sl.rep.avg$rF3 - mean.rep.global) ^ 2)
+ss.rep.total
+
+sl.rep.cl = subset(sl.rep.avg, Condition == "Control")
+sl.rep.ffi = subset(sl.rep.avg, Condition == "FFI")
+sl.rep.fficf = subset(sl.rep.avg, Condition == "FFI+CF")
+
+sl.rep.cl.n = nrow(sl.rep.cl)
+sl.rep.ffi.n = nrow(sl.rep.ffi)
+sl.rep.fficf.n = nrow(sl.rep.fficf)
+
+sl.rep.cl.mean = mean(sl.rep.cl$rF3)
+sl.rep.ffi.mean = mean(sl.rep.ffi$rF3)
+sl.rep.fficf.mean = mean(sl.rep.fficf$rF3)
+
+ss.rep.between = sl.rep.cl.n * (sl.rep.cl.mean - mean.rep.global) ^ 2 +
+                  sl.rep.ffi.n * (sl.rep.ffi.mean - mean.rep.global) ^ 2 +
+                  sl.rep.fficf.n * (sl.rep.fficf.mean - mean.rep.global) ^ 2
+ss.rep.between
+
+sl.rep.subj.mean = aggregate(rF3 ~ Subject, FUN = mean, data = sl.rep.avg)
+sl.rep.subj.mean
+
+ss.between_unit = 3 * sum((sl.rep.subj.mean$rF3 - mean.rep.global) ^ 2)
+ss.between_unit
+
+ss.rep.total - ss.rep.between - ss.between_unit
+
+TukeyHSD(sl.aov.rep)
+
+.05 / 3
+
+cl.ffi.t = t.test(sl.rep.cl$rF3, sl.rep.ffi$rF3, paired = T)
+cl.ffi.t$p.value
+
+cl.fficf.t = t.test(sl.rep.cl$rF3, sl.rep.fficf$rF3, paired = T)
+cl.fficf.t$p.value
+
+ffi.fficf.t = t.test(sl.rep.ffi$rF3, sl.rep.fficf$rF3, paired = T)
+ffi.fficf.t$p.value
+
+sl.rep.aov.t = aov(rF3 ~ Condition + Error(Subject / Condition),
+                   data = subset(sl.rep.avg, Condition != "Control"))
+summary(sl.rep.aov.t)
+
+ffi.fficf.t$statistic ^ 2
+
+chen.sample = loadCourseCSV(2024, "5_ANOVA", "Chen2020Sample.csv")
+
+chen.aov = aov(formula = Accept ~ Group * InitialTone, data = chen.sample)
+summary(chen.aov)
+
+chen.aov2 = aov(formula = Accept ~ Group + InitialTone + Group:InitialTone, 
+                data = chen.sample)
+summary(chen.aov2)
+
+chen.sample$participant = as.factor(chen.sample$participant)
+chen.aov3 = aov(formula = Accept ~ Group * InitialTone + 
+                  Error(participant / InitialTone), data = chen.sample)
+summary(chen.aov3)
