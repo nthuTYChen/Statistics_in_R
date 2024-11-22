@@ -279,3 +279,55 @@ chen.aov3 = aov(formula = Accept ~ Group * InitialTone +
 # It is the InitialTone and the interaction between Group and InitialTone that
 # significantly contribute to the "interesting variance".
 summary(chen.aov3)
+
+xtabs(~ Group + InitialTone, data = chen.sample)
+
+chen.sample.n = 1536
+
+chen.sample.global.m = mean(chen.sample$Accept)
+
+chen.sample.int.m = aggregate(Accept ~ Group + InitialTone, 
+                              FUN = mean, data = chen.sample)
+
+chen.sample.gr.m = aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
+chen.sample.ini.m = aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
+
+# Group = *NonFinalH, InitialTone = H
+chen.sample.n * (0.4602865 - chen.sample.global.m - 
+                   (0.4947917 - chen.sample.global.m) - (0.5361328 - chen.sample.global.m)) ^ 2 +
+# Group = *NonFinalR, InitialTone = H
+  chen.sample.n * (0.6119792 - chen.sample.global.m - 
+                     (0.5283203 - chen.sample.global.m) - (0.5361328 - chen.sample.global.m)) ^ 2 +
+# Group = *NonFinalH, InitialTone = R
+  chen.sample.n * (0.5292969 - chen.sample.global.m - 
+                     (0.4947917 - chen.sample.global.m) - (0.4869792 - chen.sample.global.m)) ^ 2 +
+# Group = *NonFinalR, InitialTone = R
+  chen.sample.n * (0.4446615 - chen.sample.global.m - 
+                     (0.5283203 - chen.sample.global.m) - (0.4869792 - chen.sample.global.m)) ^ 2
+
+chen.aov.3 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample)
+summary(chen.aov.3)
+
+chen.sample.unbal = chen.sample[-(1:50),]
+xtabs(~ Group + InitialTone, chen.sample.unbal)
+
+chen.aov.4 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample.unbal)
+summary(chen.aov.4)
+
+chen.aov.5 = aov(formula = Accept ~ Group * InitialTone, data = chen.sample.unbal)
+summary(chen.aov.5)
+
+sl.sim = loadCourseCSV(2024, "5_ANOVA", "SaitoLysterSim.csv")
+
+sl.sim.aov = aov(formula = rF3 ~ Group, data = sl.sim)
+# Get the analysis summary
+summary(sl.sim.aov)
+
+10691001 / (10691001 + 68242430)
+
+summary(chen.aov)
+
+chen.sample.ss.total = 1.7 + 3.7 + 21.4 + 1508.3
+1.7 / chen.sample.ss.total
+3.7 / chen.sample.ss.total
+21.4 / chen.sample.ss.total
