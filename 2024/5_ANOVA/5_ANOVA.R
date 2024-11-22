@@ -280,18 +280,31 @@ chen.aov3 = aov(formula = Accept ~ Group * InitialTone +
 # significantly contribute to the "interesting variance".
 summary(chen.aov3)
 
+# Manually calculate the variance of the potential interaction effect
+# Get the number of data points in each crossing between two levels from each
+# independent variable
+
 xtabs(~ Group + InitialTone, data = chen.sample)
 
+# The number of data points is the same in each crossing - we have a perfectly
+# balanced data set, so we can set the same sample size for each crossing.
+# However, if the data is unbalanced, you need to set different sample size numbers
+# for each crossing. See formula (14) on p.16.
 chen.sample.n = 1536
 
+# Get the global mean
 chen.sample.global.m = mean(chen.sample$Accept)
 
+# Get the means of each crossing between Group and InitialTone
 chen.sample.int.m = aggregate(Accept ~ Group + InitialTone, 
                               FUN = mean, data = chen.sample)
 
+# Get the means of each level of Group/InitialTone
 chen.sample.gr.m = aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
 chen.sample.ini.m = aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
 
+# Calculate the interaction SS with the numbers obtained above following the 
+# formula (14) (The full version, not the simplified version).
 # Group = *NonFinalH, InitialTone = H
 chen.sample.n * (0.4602865 - chen.sample.global.m - 
                    (0.4947917 - chen.sample.global.m) - (0.5361328 - chen.sample.global.m)) ^ 2 +
@@ -304,29 +317,46 @@ chen.sample.n * (0.4602865 - chen.sample.global.m -
 # Group = *NonFinalR, InitialTone = R
   chen.sample.n * (0.4446615 - chen.sample.global.m - 
                      (0.5283203 - chen.sample.global.m) - (0.4869792 - chen.sample.global.m)) ^ 2
+# The number is the same as the Sum Sq column of the interaction term in the two-way ANOVA report
 
+# Check the effect of variable order in ANOVA. With a perfectly balanced data set
+# the stats of the two main effects are the same (compared to chen.aov).
 chen.aov.3 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample)
 summary(chen.aov.3)
 
+# Drop the first 50 rows from chen.sample to create an unbalanced data set.
 chen.sample.unbal = chen.sample[-(1:50),]
+# Fewer data points in the Group:*NonFinalH - InitialTone:R crossing.
 xtabs(~ Group + InitialTone, chen.sample.unbal)
 
+# The order of independent variables now changes the stats of the two main effects.
+# The interaction stats remain unchanged. See pp.17-19 for detailed explanations.
 chen.aov.4 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample.unbal)
 summary(chen.aov.4)
 
 chen.aov.5 = aov(formula = Accept ~ Group * InitialTone, data = chen.sample.unbal)
 summary(chen.aov.5)
 
+# Calculate effect size (eta-squared) in ANOVA
+# Revisit the one-way independent-measures ANOVA based on the simulated data of
+# Saito & Lyster (2012)
 sl.sim = loadCourseCSV(2024, "5_ANOVA", "SaitoLysterSim.csv")
 
+# Rebuild the model
 sl.sim.aov = aov(formula = rF3 ~ Group, data = sl.sim)
 # Get the analysis summary
 summary(sl.sim.aov)
 
+# Check the eta-squared formula (15) on p.19 and also detailed explanations
+# on pp.19-20
 10691001 / (10691001 + 68242430)
 
+# The same formula could be extended to calculate effect sizes in two-way
+# ANOVA
 summary(chen.aov)
 
+# Just divide each SS by the total SS to calculate the effect size of each
+# main effect and interaction
 chen.sample.ss.total = 1.7 + 3.7 + 21.4 + 1508.3
 1.7 / chen.sample.ss.total
 3.7 / chen.sample.ss.total
