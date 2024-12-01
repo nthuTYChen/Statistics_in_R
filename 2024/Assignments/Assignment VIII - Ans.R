@@ -110,7 +110,7 @@ head(lexdec)
 # Task II
 # We "don't care about incorrect responses", so extract the proper subset for
 # the analysis.
-lexdec.cor = subset(lexdec, Correct == "correct")
+lexdec.cor = subset(lexdec, Correct == "correct" & NativeLanguage == "English")
 # Run one-way repeated-measures ANOVA
 lexdec.cor.aov = aov(RT ~ PrevType + Error(Subject / PrevType), data =lexdec.cor)
 summary(lexdec.cor.aov)
@@ -119,7 +119,7 @@ summary(lexdec.cor.aov)
 # has any significant impact on the RT of the current test item, we ran an
 # one-way repeated-measures ANOVA with log-RT as the dependent variable and
 # PrevType as the only within-subject independent variable. The results suggested
-# a significant effect of PrevType (F(1, 20) = 27.54, p < .001).
+# a significant effect of PrevType (F(1, 11) = 18.51, p < .01).
 
 # Task III
 # The corresponding t-test is a paired t-test, but the two samples divided by
