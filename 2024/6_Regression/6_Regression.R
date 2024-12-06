@@ -166,52 +166,92 @@ dur.pl.aov = aov(formula = DurationPrefixNasal ~ PlosivePresent,
                  data = durationsOnt)
 summary(dur.pl.aov)
 
+# Multiple Regression: Test the effects of noun frequency and familiarity
+# rating on the reaction times in the lexical decision task in the "english"
+# data set. Check the Unit 6 handout for why these two factors are potentially
+# important in a lexical decision task.
 library(languageR)
 head(english)
 
+# We only focus on test items that are categorized as a noun in this data set,
+# so we can test the genuine effect of noun frequency
 english.sub = subset(english, WordCategory == "N")
 nrow(english.sub)
 
+# Include only columns with the crucial information we need here.
 english.sub = english.sub[c("RTlexdec", "NounFrequency", "Familiarity", "Word")]
 head(english.sub)
 
+# The natural log of 0 would be negative infinity, which would cause problems
+# when doing mathemetical calculations. In some occassions, a lexical entry
+# might have a frequency of zero because it is not documented in a corpus.
 log(0)
 
-# Add-1 smoothing
+# Since raw frequencies would potentially have zeros, we can add a small number
+# to all frequencies before log-transformation. Here we add 1, which is thus called
+# "Add-1 smoothing".
 english.sub$NounFreq.log = log(english.sub$NounFrequency + 1)
 
+# Although frequency is highly correlated with familiarity (if a word is used
+# more frequently, it is supposed to be a more familiar word), there are still
+# some exceptions. Let's try to find the nouns that have a relatively lower
+# frequency but a relatively higher familiarity.
 freq.mean = mean(english.sub$NounFreq.log)
 freq.sd = sd(english.sub$NounFreq.log)
 fam.mean = mean(english.sub$Familiarity)
 fam.sd = sd(english.sub$Familiarity)
+# frequency < mean - 1SD & familiarity > mean + 1SD
 english.sub.exc = subset(english.sub, NounFreq.log < freq.mean - freq.sd &
                            Familiarity > fam.mean + fam.sd)
 head(english.sub.exc)
 
+# Build a multiple regression with the predictors WITHOUT their interaction.
 english.lm = lm(RTlexdec ~ NounFreq.log + Familiarity, data = english.sub)
+# See the Unit 6 handout for the explanations of all statistics in the model.
 summary(english.lm)
 
+# Calculate the predict value of RTlexdec when NounFreq.log and Familiarity are
+# both 1 using the linear equation.
 6.809384 + -0.020492 * 1 + -0.040432 * 1
 
+# To show the difference between the intercept and the above predicted RT in
+# raw RT, you must convert the log RTs back to raw RTs before calculating the
+# difference.
 exp(6.809384) - exp(6.809384 + -0.020492 * 1 + -0.040432 * 1)
 
+# Use predict() to calculate the predicted values with a data frame including
+# the same predictors (the column names must be the same as the predictor names
+# in the model) and the predictors' values.
 english.new = data.frame(NounFreq.log = seq(1, 5), Familiarity = seq(3, 7))
 english.new
 
+# Calculate the predicted values of the dependent variable (RTlexdec) with 
+# the regression model and the data framing containing the new values of the
+# two predictors.
 predict(object = english.lm, newdata = english.new)
 
+# Just merge the predicted values with the data frame including the new values
+# of the two predictors to make it easier to see everything together.
 english.pred = predict(object = english.lm, newdata = english.new)
 english.new$RT.pred = as.vector(english.pred)
 english.new
 head(english.sub)
 
+# Compare the multiple regression model with the simple linear regression model
+# including either predictor; the multiple regression model can explain 2-4%
+# more variance in RTlexdec than the simple linear regression model, which is
+# a significant improvement.
 english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
 summary(english.lm.freq)
 english.lm.fam = lm(RTlexdec ~ Familiarity, data = english.sub)
 summary(english.lm.fam)
 
+# There's a strong correlation between noun frequency and familiarity as expected,
+# which leads to a potential linearity problem.
 cor(english.sub$NounFreq.log, english.sub$Familiarity)
 
+# Similulate the collinearity problem. Check the collinearity section of the
+# Unit 6 handout for explanations.
 set.seed(100)
 x = rnorm(n = 50)
 y = 10 + 3 * x + rnorm(n = 50)
@@ -226,26 +266,53 @@ summary(lm(y ~ x2))
 coll.lm = lm(y ~ x + x2)
 summary(coll.lm)
 
+# Use the vif() function of the "car" package to estimate the variance 
+# inflation factor and the seriousness of the collinearity problem.
 library(car)
+# VIF is above 110 for the model simulating the collinearity problem, which
+# is well above the more lenient threshold (i.e., 10) in the literature.
 vif(coll.lm)
 
+# VIF is below 3 for the real-world model, so the strong correlation between
+# noun frequency and familiarity is not a real issue.
 vif(english.lm)
 
-# NounFreq.log + Familiarity + NounFreq.log:Familiarity
+# Multiple regression with interactions; see Unit 6 handout for why we expect
+# an interaction between noun frequency and familiarity
+
+# Build the multiple regression model with the two-way interaction
+# As in ANOVA, NounFreq.log * Familiarity =  
+#                     NounFreq.log + Familiarity + NounFreq.log:Familiarity
 english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
+# Check the Unit 6 handout for detailed explanations of the model summary.
 summary(english.lm.int)
 
+# Calculate the predicted RTlexdec when NounFreq.log is 2 and Familiarity is 3;
+# the interaction term literally means to multiply the two predictors.
 6.977674 + -0.057196 * 2 + -0.08433 * 3 + 0.00894 * 2 * 3
 
+# Get the predicted values of RTlexdec with this new model with the interaction
+# between two predictors.
 predict(object = english.lm.int, newdata = english.new)
 
+# Multiple linear regression when both predictors are categorical with two levels
+# See the Unit 6 handout for an explanation of why we expect the duration of [n]
+# in the ont- prefix is influenced simultaneously by the presence of the stop [t]
+# and the gender of speakers.
 head(durationsOnt)
 
+# Convert the two categorical predictors into factors so they can serve as 
+# predictors in our regression modeling. They are dummy-coded by default.
 durationsOnt$Sex.Fac = as.factor(durationsOnt$Sex)
 durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
 
+# Check the contrast table for the coding of the two predictors; in Sex.Fac,
+# female = 0 = the reference level and in Pl.Pr.Fac, no = 0 = the reference
+# level
 contrasts(durationsOnt$Sex.Fac)
 contrasts(durationsOnt$Pl.Pr.Fac)
 
+# Build the multiple regression model. See the Unit 6 handout for the explanation
+# of the statistics in the model.
 dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 summary(dur.cat.lm)
