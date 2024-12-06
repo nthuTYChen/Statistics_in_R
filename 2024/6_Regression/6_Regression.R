@@ -165,3 +165,87 @@ summary(dur.lm.plo.sum)
 dur.pl.aov = aov(formula = DurationPrefixNasal ~ PlosivePresent,
                  data = durationsOnt)
 summary(dur.pl.aov)
+
+library(languageR)
+head(english)
+
+english.sub = subset(english, WordCategory == "N")
+nrow(english.sub)
+
+english.sub = english.sub[c("RTlexdec", "NounFrequency", "Familiarity", "Word")]
+head(english.sub)
+
+log(0)
+
+# Add-1 smoothing
+english.sub$NounFreq.log = log(english.sub$NounFrequency + 1)
+
+freq.mean = mean(english.sub$NounFreq.log)
+freq.sd = sd(english.sub$NounFreq.log)
+fam.mean = mean(english.sub$Familiarity)
+fam.sd = sd(english.sub$Familiarity)
+english.sub.exc = subset(english.sub, NounFreq.log < freq.mean - freq.sd &
+                           Familiarity > fam.mean + fam.sd)
+head(english.sub.exc)
+
+english.lm = lm(RTlexdec ~ NounFreq.log + Familiarity, data = english.sub)
+summary(english.lm)
+
+6.809384 + -0.020492 * 1 + -0.040432 * 1
+
+exp(6.809384) - exp(6.809384 + -0.020492 * 1 + -0.040432 * 1)
+
+english.new = data.frame(NounFreq.log = seq(1, 5), Familiarity = seq(3, 7))
+english.new
+
+predict(object = english.lm, newdata = english.new)
+
+english.pred = predict(object = english.lm, newdata = english.new)
+english.new$RT.pred = as.vector(english.pred)
+english.new
+head(english.sub)
+
+english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
+summary(english.lm.freq)
+english.lm.fam = lm(RTlexdec ~ Familiarity, data = english.sub)
+summary(english.lm.fam)
+
+cor(english.sub$NounFreq.log, english.sub$Familiarity)
+
+set.seed(100)
+x = rnorm(n = 50)
+y = 10 + 3 * x + rnorm(n = 50)
+summary(lm(y ~ x))
+
+set.seed(200)
+x2 = x - rnorm(50) * 0.1
+cor(x, x2)
+
+summary(lm(y ~ x2))
+
+coll.lm = lm(y ~ x + x2)
+summary(coll.lm)
+
+library(car)
+vif(coll.lm)
+
+vif(english.lm)
+
+# NounFreq.log + Familiarity + NounFreq.log:Familiarity
+english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
+summary(english.lm.int)
+
+6.977674 + -0.057196 * 2 + -0.08433 * 3 + 0.00894 * 2 * 3
+
+predict(object = english.lm.int, newdata = english.new)
+
+head(durationsOnt)
+
+durationsOnt$Sex.Fac = as.factor(durationsOnt$Sex)
+durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
+
+contrasts(durationsOnt$Sex.Fac)
+contrasts(durationsOnt$Pl.Pr.Fac)
+
+dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
+summary(dur.cat.lm)
