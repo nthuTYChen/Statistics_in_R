@@ -317,63 +317,113 @@ contrasts(durationsOnt$Pl.Pr.Fac)
 dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 summary(dur.cat.lm)
 
+# Try to demonstrate that the order of predictors does not matter in regression
+# modeling, unlike in ANOVA. The estimates in regression are calculated all at 
+# once, but the variances are partitioned following the order of independent
+# variables in Type I ANOVA.
 dur.cat.lm2 = lm(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, data = durationsOnt)
 summary(dur.cat.lm2)
 
+# To show the ordering effect in Type I ANOVA
 dur.cat.aov = aov(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 dur.cat.aov2 = aov(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, data = durationsOnt)
 summary(dur.cat.aov)
 summary(dur.cat.aov2)
 
+# Since ANOVA is just a special form of regression, you can use anova() to
+# run an ANOVA based on a regression model. The main benefit is that you can
+# check the overall effect of an independent variable.
 anova(dur.cat.lm)
 
-# 10 questions with two choices, 6 correct, 4 incorrect
+# Logistic Regression
+# We begin with the binomial exact test, which is the fundation of logistic
+# regression. This is introduced in the Unit 7 handout, so check it for some
+# more details.
+
+# 10 questions with two choices, 6 correct, 4 incorrect; assuming that random
+# guessing gives each possibility an equal probability (.5), is the difference in
+# the observed the binary outcomes due to chance? 
 binom.test(x = 6, n = 10, p = .5)
 
-# 100 questions with two choices, 60 correct, 40 incorrect
+# 100 questions with two choices, 60 correct, 40 incorrect; assuming that random
+# guessing gives each possibility an equal probability (.5), is the difference in
+# the observed the binary outcomes due to chance? 
 binom.test(x = 60, n = 100, p = .5)
 
+# In logistic regression analyzing binary events, the "hit" number is converted
+# into log odds-ratio to solve several problems: 1) 0s and 1s are discrete
+# rather than continuous, 2) 0s and 1s do not form a normal distribution with
+# infinity on either side of the distribution, which is also a fundamental
+# assumption in regression modeling. See the Unit 6 handout for explanations.
 hits = 60
 sample.n = 100
 p1 = 60 / 100
 odds.ratio = p1 / (1 - p1)
 logit.p1 = log(odds.ratio)
 
+# Convert log odds-ratio back to the raw "hit" number.
 odds.ratio.raw = exp(logit.p1)
 p1.raw = odds.ratio.raw / (1 + odds.ratio.raw)
 0.6 * sample.n
 
+# Revisit the sample data set of Chen's (2020) artificial grammar learning
+# experiment to demonstrate logistic regression modeling on the binary
+# acceptance rate of test items by learners in different learning conditions.
 source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
 chen.sample = loadCourseCSV(2024, "6_Regression", "Chen2020Sample.csv")
 
+# Convert both predictors into a factor, which by default adopts the dummy-coding
+# system.
 chen.sample$InitialTone_Fac = as.factor(chen.sample$InitialTone)
 chen.sample$Group_Fac = as.factor(chen.sample$Group)
+# Convert both predictors into sum-coded predictors, so the intercept in this
+# model also represents the predictoed global mean.
 contrasts(chen.sample$InitialTone_Fac) = contr.sum(2)
 contrasts(chen.sample$Group_Fac) = contr.sum(2)
 
+# Fit a logistic regression model to our data using the glm() function, which
+# stands for "generalized linear regression model".
 chen.glm = glm(Accept ~ Group_Fac * InitialTone_Fac, family = "binomial",
                data = chen.sample)
+# Check the Unit 6 handout for detailed explanations of how to interpret the 
+# statistics in the model summary. The most crucial part may be that all
+# estimates are on the log odds-ratio scale.
 summary(chen.glm)
 
+# Try to convert the intercept back to the raw number of "hits" (1 = Accept in
+# the current demo), or the predicted global mean of "Accept" response numbers
 chen.p1.logit = 0.04788
 chen.p1.odds.ratio = exp(chen.p1.logit)
 chen.p1 = chen.p1.odds.ratio / (1 + chen.p1.odds.ratio)
 
+# Validate the predicted global mean
 mean(chen.sample$Accept)
 
+# We did the rest of the manual calculations in class, so try it yourself if
+# you've missed it.
+
+# Try to validate the mean acceptance rate for each group.
 mean(chen.sample[chen.sample$Group == "NonFinalH",]$Accept)
 mean(chen.sample[chen.sample$Group == "NonFinalR",]$Accept)
 
+# Try to validate the mean acceptance rate for each group crossed with each
+# initial tone of the test items and show the significant interaction between
+# the categorical predictor.
 aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
 
-exp(0.04788 + -1 * -0.06881 + 1 * 0.10035 + -0.23860 * 1 * -1)
-
-1.577182 / (1 + 1.577182)
-
+# Build another logistic regression model without the two-way interaction.
+# The "goodness of fit" of a logistic regression model is quantified by AIC 
+# (rather than r2 as in ordinary linear regression). AIC represents the
+# differences between predicted values and the actual values, so the lower, the
+# better. Without the two-way interaction, this second model has a higher AIC,
+# so this model is poorer than the model with the interaction.
 chen.glm2 = glm(Accept ~ Group_Fac + InitialTone_Fac, family = "binomial",
                data = chen.sample)
 summary(chen.glm2)
 
+# To quickly introduce another important statistical test: Chi-square test.
+# For detailed explanations, check the Unit 7 handout. The following demo
+# is from the "One-way Chi-square test" section.
 TwSyllables = loadCourseCSV("2024", "7_Nonparametric", "TwSyllables.csv")
 head(TwSyllables)
 
