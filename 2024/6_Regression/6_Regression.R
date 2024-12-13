@@ -316,3 +316,71 @@ contrasts(durationsOnt$Pl.Pr.Fac)
 # of the statistics in the model.
 dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 summary(dur.cat.lm)
+
+dur.cat.lm2 = lm(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, data = durationsOnt)
+summary(dur.cat.lm2)
+
+dur.cat.aov = aov(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
+dur.cat.aov2 = aov(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, data = durationsOnt)
+summary(dur.cat.aov)
+summary(dur.cat.aov2)
+
+anova(dur.cat.lm)
+
+# 10 questions with two choices, 6 correct, 4 incorrect
+binom.test(x = 6, n = 10, p = .5)
+
+# 100 questions with two choices, 60 correct, 40 incorrect
+binom.test(x = 60, n = 100, p = .5)
+
+hits = 60
+sample.n = 100
+p1 = 60 / 100
+odds.ratio = p1 / (1 - p1)
+logit.p1 = log(odds.ratio)
+
+odds.ratio.raw = exp(logit.p1)
+p1.raw = odds.ratio.raw / (1 + odds.ratio.raw)
+0.6 * sample.n
+
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+chen.sample = loadCourseCSV(2024, "6_Regression", "Chen2020Sample.csv")
+
+chen.sample$InitialTone_Fac = as.factor(chen.sample$InitialTone)
+chen.sample$Group_Fac = as.factor(chen.sample$Group)
+contrasts(chen.sample$InitialTone_Fac) = contr.sum(2)
+contrasts(chen.sample$Group_Fac) = contr.sum(2)
+
+chen.glm = glm(Accept ~ Group_Fac * InitialTone_Fac, family = "binomial",
+               data = chen.sample)
+summary(chen.glm)
+
+chen.p1.logit = 0.04788
+chen.p1.odds.ratio = exp(chen.p1.logit)
+chen.p1 = chen.p1.odds.ratio / (1 + chen.p1.odds.ratio)
+
+mean(chen.sample$Accept)
+
+mean(chen.sample[chen.sample$Group == "NonFinalH",]$Accept)
+mean(chen.sample[chen.sample$Group == "NonFinalR",]$Accept)
+
+aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
+
+exp(0.04788 + -1 * -0.06881 + 1 * 0.10035 + -0.23860 * 1 * -1)
+
+1.577182 / (1 + 1.577182)
+
+chen.glm2 = glm(Accept ~ Group_Fac + InitialTone_Fac, family = "binomial",
+               data = chen.sample)
+summary(chen.glm2)
+
+TwSyllables = loadCourseCSV("2024", "7_Nonparametric", "TwSyllables.csv")
+head(TwSyllables)
+
+TwSyllables.xtab = xtabs(~ Tone, data = subset(TwSyllables, Tone != "T0"))
+TwSyllables.xtab
+sum(TwSyllables.xtab)
+
+chisq.test(TwSyllables.xtab)
+
+chisq.test(c(60, 40))
