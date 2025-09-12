@@ -117,3 +117,31 @@ result
 # Data frame
 df = read.csv(paste(resourcesURL, "dummyDataFrame.csv", sep = ""))
 df
+
+df[1]
+
+df["Age"]
+
+df$Age
+
+str(df)
+
+df[1, 2]
+
+df[1,]
+
+df[1,]$Age
+
+df[1, "Age"]
+
+x1 = 1:2
+
+df[x1,]
+
+x2 = c(1, 3)
+
+df[x2,]
+
+y = 2:3
+
+df[x2, y]
