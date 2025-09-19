@@ -75,3 +75,57 @@ summary(dist.norm)
 # that is, the inter-quartile range (the range representing the 25%-75% of
 # a data distribution).
 IQR(dist.norm)
+
+dist.norm.diff = dist.norm - mean(dist.norm)
+
+sum(dist.norm.diff)
+
+# Sum of squares
+ss.norm = sum(dist.norm.diff ^ 2)
+
+# Mean variance (population)
+ss.norm / length(dist.norm.diff)
+
+# Mean variance (sample)
+var(dist.norm)
+
+# Mean variance (sample)
+ss.norm / (length(dist.norm.diff) - 1)
+
+# Standard deviation (sample)
+sd.norm = sqrt(ss.norm / (length(dist.norm.diff) - 1))
+sd(dist.norm)
+
+# Try to generate the density plot for "dist.norm"
+dist.norm.den = density(dist.norm)
+plot(dist.norm.den, main = "(Near-)Normal Distribution")
+abline(v = mean(dist.norm), col = "red", lwd = 1.5)
+abline(v = median(dist.norm), col = "blue", lwd = 1.5)
+abline(v = mean(dist.norm) + sd.norm, col = "green", lwd = 1.5, lty = 2)
+abline(v = mean(dist.norm) - sd.norm, col = "green", lwd = 1.5, lty = 2)
+
+# Compare an actual sample distribution to its corresponding theoretical 
+# normal distribution
+set.seed(1)
+
+nums = rnorm(n = 100, mean = 10, sd = 2)
+
+noise = runif(n = 100)
+
+nums.noi = nums * noise
+
+nums.noi.den = density(nums.noi)
+plot(nums.noi.den, xlim = c(-5, 15), ylim = c(0, 0.15),
+     main = "Sample vs. Theoretical Distribution")
+
+nums.mean = mean(nums.noi)
+nums.sd = sd(nums.noi)
+
+range.seq = seq(from = -5, to = 15, by = 0.01)
+range.seq.d = dnorm(x = range.seq, mean = nums.mean, sd = nums.sd)
+
+lines(x = range.seq, y = range.seq.d, col = "purple", lwd = 2)
+
+# Q-Q Plot
+qqnorm(nums.noi, main = "(Near-)Normal Q-Q Plot: nums:noi")
+qqline(nums.noi, col = "red")
