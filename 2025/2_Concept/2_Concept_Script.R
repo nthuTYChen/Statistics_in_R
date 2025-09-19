@@ -106,26 +106,56 @@ abline(v = mean(dist.norm) - sd.norm, col = "green", lwd = 1.5, lty = 2)
 
 # Compare an actual sample distribution to its corresponding theoretical 
 # normal distribution
+
+# Set a random seed, so a random process always generates the same results
+# with a specific algorithm. We set the same random seed together so we
+# will get the same results from a random process.
 set.seed(1)
 
+# Randomly select 100 values from a normal distribution with a mean of 10
+# and an SD of 2
 nums = rnorm(n = 100, mean = 10, sd = 2)
 
+# Randomly select another 100 values between 0 and 0.999999... from a uniform 
+# distribution as "noise" (i.e., random variation).
 noise = runif(n = 100)
 
+# Multiply the 100 data points with the noise values so our data distribution
+# becomes a bit "messy", just like a data set we would get in the real world.
+# Without noise, our data distribution will be just a normal distribution, and
+# it won't be meaningful to make the comparison.
 nums.noi = nums * noise
 
+# Get the density info for each value in the "noisy" data distribution.
 nums.noi.den = density(nums.noi)
+
+# Get the density plot for the "noisy" distribution. The range of x-axis and
+# y-axis is arbitrary - they simply cover the minimum and maximum values of
+# the distribution (-5, 15) and the minimum and maximum density values (0, 0.15).
 plot(nums.noi.den, xlim = c(-5, 15), ylim = c(0, 0.15),
      main = "Sample vs. Theoretical Distribution")
 
+# For each sample, there's a theoretical normal distribution with the same mean
+# and SD. To visualize this theoretical distribution, let's get the mean and SD
+# of the noisy distribution first.
 nums.mean = mean(nums.noi)
 nums.sd = sd(nums.noi)
 
+# Generate a sequence of numbers from -5 and 15, and the interval is filled with
+# numbers that differ by 0.01. The range is chosen to match the range of the
+# x-axis in the density plot generated above.
 range.seq = seq(from = -5, to = 15, by = 0.01)
+
+# With this sequence of numbers, get the density value for each number from
+# a normal distribution with the mean and SD of the noisy distribution.
 range.seq.d = dnorm(x = range.seq, mean = nums.mean, sd = nums.sd)
 
+# Add this density curve representing the corresponding normal distribution
+# to the existing density plot.
 lines(x = range.seq, y = range.seq.d, col = "purple", lwd = 2)
 
-# Q-Q Plot
+# Generate the Q-Q Plot of the noisy distribution to compare a sample 
+# distribution to its corresponding normal distribution more easily.
+# See the Unit 2 handout for a more detailed explanation.
 qqnorm(nums.noi, main = "(Near-)Normal Q-Q Plot: nums:noi")
 qqline(nums.noi, col = "red")
