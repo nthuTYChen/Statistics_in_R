@@ -159,3 +159,19 @@ lines(x = range.seq, y = range.seq.d, col = "purple", lwd = 2)
 # See the Unit 2 handout for a more detailed explanation.
 qqnorm(nums.noi, main = "(Near-)Normal Q-Q Plot: nums:noi")
 qqline(nums.noi, col = "red")
+
+pnorm(q = -1.96)
+pnorm(q = 1.96)
+
+pnorm(q = 1.96, lower.tail = FALSE)
+
+pnorm(q = 1) - pnorm(q = -1)
+
+# mean = 25, sd = 3
+pnorm(q = 18, mean = 25, sd = 3)
+pnorm(q = 19, mean = 25, sd = 3, lower.tail = F)
+
+qnorm(p = .025)
+qnorm(p = .025, lower.tail = F)
+
+qnorm(p = .05, mean = 25, sd = 3, lower.tail = F)
