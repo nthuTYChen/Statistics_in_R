@@ -160,18 +160,39 @@ lines(x = range.seq, y = range.seq.d, col = "purple", lwd = 2)
 qqnorm(nums.noi, main = "(Near-)Normal Q-Q Plot: nums:noi")
 qqline(nums.noi, col = "red")
 
-pnorm(q = -1.96)
-pnorm(q = 1.96)
+# Get the probability (proportion) represented by the area BELOW a specific
+# value in a normal distribution using pnorm(). If mean and SD are not specified,
+# they are 0 and 1 by default. In this case, each specific value is equivalent
+# to the SD from mean itself.
+pnorm(q = -1.96) # The area below -1.96
+pnorm(q = 1.96) # The area below 1.96
 
+# The area above 1.96 (i.e., the area in the upper tail)
 pnorm(q = 1.96, lower.tail = FALSE)
 
+# The area between -1 and 1.
 pnorm(q = 1) - pnorm(q = -1)
 
 # mean = 25, sd = 3
+# The area below 18 (or (18-25)/3 = -2 SD from the mean)
 pnorm(q = 18, mean = 25, sd = 3)
+# The area above 19
 pnorm(q = 19, mean = 25, sd = 3, lower.tail = F)
 
-qnorm(p = .025)
+# Get the value of a boundary that separate an area representing a specific
+# probability below the boundary (by default) in a normal distribution. Again,
+# if mean and SD are not specified, the normal distribution has a mean of 0
+# and an SD of 1.
+
+# The boundary that defines an area representing the probability of 0.025
+# in the lower tail
+qnorm(p = .025) 
+
+# The boundary that defines an area representing the probability of 0.025
+# in the upper tail
 qnorm(p = .025, lower.tail = F)
 
+# The boundary that defines an area representing the probability of 0.05
+# in the UPPER tail in a normal distribution with a mean of 25 and an SD
+# of 3.
 qnorm(p = .05, mean = 25, sd = 3, lower.tail = F)
