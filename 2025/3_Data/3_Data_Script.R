@@ -54,6 +54,19 @@ jabberwocky.ord = jabberwocky.df[count.des.ord,]
 # frequency
 tail(jabberwocky.ord, 10)
 
+# Load another data frame in which each word type in Jabberwocky is marked with
+# information regarding whether the word is a real word or not and whether it is
+# a function word or a content word.
+jabberwocky.wordCat = loadCourseCSV(2025, "3_Data", "jabberwocky_words_cat.csv")
+
+# I could not identify the word category of some word types in the corpus,
+# so in the Cat column, these word types have the value NA (= not applicable)
+# is.na() checks if values of a vector is equal to NA and returns TRUEs and FALSES
+# The result of checking the Cat column is saved to cat.na first.
+cat.na = is.na(jabberwocky.wordCat$Cat)
+# Sum all TRUEs to show how many NAs there are in Cat.
+sum(cat.na) # 3
+
 # Show the rows whose Cat column has an NA value.
 jabberwocky.wordCat[cat.na,]
 # Show the rows whose Cat colunm DOES NOT have an NA value.
@@ -102,7 +115,6 @@ jabberwocky.perc = jabberwocky.prob * 100
 # Get the percentages and round them to the first decimal place.
 jabberwocky.perc = round(jabberwocky.prob * 100, digit = 1)
 
-
 # Continuous data from the package "languageR"
 library(languageR)
 # We focus on the durationsOnt data frame. For its details, check its official
@@ -138,33 +150,59 @@ pnorm(q = -3) * 2
 # A total chance of 4.6% to randomly sample a value below/above +-2SD from the mean
 pnorm(q = -2) * 2
 
+# The first way of identifying outliers: Find the upper/lower boundaries represented 
+# by actual values, and find  all the values beyond the boundaries.
+
+# Get the mean and the SD of prefix duration
 pref.dur.mean = mean(durationsOnt$DurationOfPrefix)
 pref.dur.sd = sd(durationsOnt$DurationOfPrefix)
 
+# Calculate the actual values of the outlier boundaries that represent +-2.5SD
+# from the mean.
 pref.dur.upper = pref.dur.mean + pref.dur.sd * 2.5
 pref.dur.lower = pref.dur.mean - pref.dur.sd * 2.5
 
+# Check whether each prefix duration length is lower than the lower boundary
+# OR (|) higher than the upper boundary. This process returns a vector of 
+# Boolean values (TRUE vs. FALSE), which is stored in "outliers"
 outliers = durationsOnt$DurationOfPrefix < pref.dur.lower |
   durationsOnt$DurationOfPrefix > pref.dur.upper
 
+# Since all TRUEs equals to 1 and all FALSES equals to 0, summing the entire
+# vector of Boolean values gives you the number of TRUEs in the vector.
 sum(outliers)
 
+# List all the outlier rows (outliers = TRUE) and the first six variables.
 durationsOnt[outliers, 1:6]
 
+# The second way of identifying outliers: Convert raw values into SDs, and 
+# find all the SDs that fall beyond the outlier SD boundaries.
+
+# Divide each distance between an actual value and the mean by SD, so each
+# raw value is converted into an SD from the mean.
 durationsOnt$DurPref.sd = 
   (durationsOnt$DurationOfPrefix - pref.dur.mean) / pref.dur.sd
 
+# Find the outliers by checking if each SD falls beyond +-2.5SD
 outliers.sd = durationsOnt$DurPref.sd < -2.5 | 
   durationsOnt$DurPref.sd > 2.5
 
+# You get the same outlier number
 sum(outliers.sd)
 
+# You get the same outlier.
 durationsOnt[outliers.sd, 1:6]
 
+# The Frequency column of durationsOnt actually contains log frequency
+# The opposite of natural logarithm is exponential, so we can use the exp() 
+# function to convert log frequencies back to raw frequencies, which are then
+# saved to a new column Freq.raw in durationsOnt.
 durationsOnt$Freq.raw = exp(durationsOnt$Frequency)
-
+# Show the first six raw frequencies
 head(durationsOnt$Freq.raw)
 
+# Check the density plot of the raw word frequency to take a look at a 
+# Zipf's distribution: See p.22 of the Unit 3 handout for explanation
 par(mfrow = c(1, 2))
 plot(density(durationsOnt$Freq.raw),
      main = "Raw Frequency of ont- Words (Density)")
@@ -173,6 +211,9 @@ qqnorm(durationsOnt$Freq.raw,
 qqline(durationsOnt$Freq.raw, col = "red", lwd = 1.5)
 par(mfrow = c(1, 1))
 
+# Log-transformation helps significantly reduce the long upper tail and
+# strech the lower tail a little bit, and that's why the distribution of log 
+# frequency is more normal-like.
 par(mfrow = c(1, 2))
 plot(density(durationsOnt$Frequency),
      main = "Log Frequency of ont- Words (Density)")
@@ -181,86 +222,146 @@ qqnorm(durationsOnt$Frequency,
 qqline(durationsOnt$Frequency, col = "red", lwd = 1.5)
 par(mfrow = c(1, 1))
 
+# Small intervals between small numbers are converted into equal intervals
+# close to 0.693... after log-transformation.
 log(c(0.5, 1, 2, 4, 8))
+# LARGE intervals between LARGE numbers are also converted into equal intervals
+# closee to 0.693... after log-transformation.
 log(c(200, 400, 800))
 
-durationsOnt$Freq.cat = 
-  ifelse(test = durationsOnt$Frequency >= median(durationsOnt$Frequency),
-         yes = "High", no = "Low")
+# Explore the possibility that high-frequency words have a phonetically shorter
+# ont- prefix
 
-head(durationsOnt[c("Word", "Frequency", "Freq.cat")])
+# Divide log frequencies by median, ONLY FOR THE PURPOSE OF DATA EXPLORATION
+# ifelse() returns "Highs" or "Low" based on the results of the "test", namely
+# whether the values in Frequency is higher than or equal to the median of
+# Frequency: If TRUE, then return the "yes" value, and if FALSE, return the "Low"
+# value.
+durationsOnt$Freq.cat = ifelse(test = durationsOnt$Frequency >= 
+                                 median(durationsOnt$Frequency),
+                               yes = "High", no = "Low")
 
+# Divide DurationOfPrefix values in durationsOnt by the two levels of Freq.cat,
+# and apply the mean() function to each subgroup (i.e., calculate the mean of
+# Frequency for "High" and "Low" groups).
 aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = mean, data = durationsOnt)
+# Divide DurationOfPrefix values in durationsOnt by the two levels of Freq.cat,
+# and apply the sd() function to each subgroup (i.e., calculate the SD of
+# Frequency for "High" and "Low" groups).
 aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = sd, data = durationsOnt)
 
+# The means of the prefix duration are close for "High" and "Low" ont- words,
+# and the SD shows that the ranges of prefix duration greatly overlap for "High"
+# and "Low" ont- words. So, it doesn't seem that "High" words have a significantly
+# shorter ont- prefix than the "Low" words.
+
+# Directly correlate one continuous variable with another continuous variable
+# using cor().
+# Pearson's correlation coefficient = -0.02... It's close to zero, which suggests
+# no correlation between log frequency and the duration of the ont- prefix
 cor(durationsOnt$Frequency, durationsOnt$DurationOfPrefix)
 
+# Explore binary/categorical data based on Myers' (2015) study. See p.15-16 of 
+# the Unit 3 handout for the detailed explanation of the study.
 Myers.sample = loadCourseCSV(2025, "3_Data", "Myers_2015_Sample.csv")
 
+# Nonwords without a valid response have a zero RT, which are useless.
+# Use subset() to extract the rows in Myers.sample who's RT is zero. 
 Myers.noResp = subset(Myers.sample, RT == 0)
-head(Myers.noResp)
+# There are only seven nonwords in the subset
+Myers.noResp
+# Use nrow() to confirm the number of invalid responses.
 nrow(Myers.noResp)
 
+# What we need are nonwords with a valid responses, namely the rows whose RT
+# is above zero.
 Myers.resp = subset(Myers.sample, RT > 0)
 nrow(Myers.resp)
 
+# But responses made within the first 200ms after seeing a nonword were probably
+# accidental (e.g., press a response key by accident), so they might not provide
+# useful information and should be dropped.
 Myers.noShortRT = subset(Myers.resp, RT > 200)
-nrow(Myers.noShortRT) - nrow(Myers.resp)
+# More than 2,000 responses were dropped in this screening process.
+nrow(Myers.resp) - nrow(Myers.noShortRT)
 
+# Check the distribution of raw RTs: The distribution is severely rightly skewed.
+# For the reason why, see p.17 of the Unit 3 handout
 plot(density(Myers.noShortRT$RT), main = "Raw RT Distribution in Myers (2015)")
 
+# Right skewness could be remedied with log-transformation.
 Myers.noShortRT$logRT = log(Myers.noShortRT$RT)
-
+# The distribution of log-RT is not perfectly normal, but it looks much better
+# than the distribution of raw RTs
 plot(density(Myers.noShortRT$logRT), 
      main = "Log RT Distribution in Myers (2015)")
 
-Myers.logrt.mean = mean(Myers.noShortRT$logRT)
-Myers.logrt.sd = sd(Myers.noShortRT$logRT)
+# Exclude outlier log-RTs that go beyond +-2.5SD from the mean, because unusually
+# slow/fast responses might be meaningless, too.
+Myers.logRT.mean = mean(Myers.noShortRT$logRT)
+Myers.logRT.sd = sd(Myers.noShortRT$logRT)
 
+# Extract rows whose logRT has a value within the range -2.5SD<--Mean-->+2.5SD
 Myers.noShortRT$logRT.sd = 
   (Myers.noShortRT$logRT - Myers.logrt.mean) / Myers.logrt.sd
 
 Myers.sd25 = subset(Myers.noShortRT, logRT.sd >= -2.5 & logRT.sd <= 2.5)
 nrow(Myers.sd25) - nrow(Myers.noShortRT)
 
-plot(density(Myers.sd25$logRT), 
-     main = "Log RT without Outliers in Myers (2015)")
+# 200+ observations with an outlier RT were dropped.
+nrow(Myers.noShortRT) - nrow(Myers.sd25)
 
-Myers.acc = aggregate(x = Response ~ ItemID + Item_ZhuyinFuhao,
+# Because binary responses were coded as 1 vs. 0 in Response, we can calculate
+# the average of Response by ItemID to get the average acceptability of each
+# nonword using aggregate(). Item_ZhuyinFuhao is equal to ItemID but is still 
+# included here as another grouping variable so ZhuyinFuhao can be included
+# in the output data frame as well. This part was updated to the Unit 3 handout
+# right before the Week 5 lecture on Oct 4, so make sure that you download the
+# most updated handout and check p.19.
+Myers.acc = aggregate(x = Response ~ ItemID + Item_ZhuyinFuhao, 
                       FUN = mean, data = Myers.sd25)
-head(Myers.acc)
 
+# Sort the data frame based on average acceptabilities in decreasing order. 
 acc.row.sorted = order(Myers.acc$Response, decreasing = T)
-head(acc.row.sorted)
-
 Myers.acc.ord = Myers.acc[acc.row.sorted,]
+# Check the six most acceptable nonwords
 head(Myers.acc.ord)
+# Check the six least acceptable nonwords
 tail(Myers.acc.ord)
 
 aggregate(Response ~ Session + Participant, FUN = mean, data = Myers.sd25)
 
+# Plotting your data
+
+# Starting with the Jabberwocky corpus and make sure that you have loaded the 
+# required datasets 
 jabberwocky.wd = loadCourseCSV(2025, "3_Data", "jabberwocky_words.txt")
 head(jabberwocky.wd)
 jabberwocky.table = table(jabberwocky.wd$Word)
 head(jabberwocky.table)
 
-jabberwocky.table2 = jabberwocky.table[jabberwocky.table > 1]
-head(jabberwocky.table2)
+# Since there are too many word types in the Jabberwocky frequency table,
+# we extract the subset with a token frequency above 1.
+jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
 
-jabberwocky.table.ord = order(jabberwocky.table2, decreasing = T)
-head(jabberwocky.table.ord)
+# Barplot is the best choice for visualizing word frequency for reasons 
+# specified on p.21 of the Unit 3 handout.
 
-jabberwocky.table3 = jabberwocky.table2[jabberwocky.table.ord]
-head(jabberwocky.table3)
+# The "height" parameter takes a table, so the height of each bar
+# is determined by the value of each column in the table. We need to adjust
+# the range of y-axis by specifying "ylim", so the scale of the y-axis covers 
+# the highest  token frequency (i.e., 19) in the table. Other parameters are
+# explained on p.21 of the handout.
+barplot(height = jabberwocky.table.2, ylim = c(0, 20),
+        main = "Jabberwocky Word Count (Token Freq > 1)", xlab = "",
+        ylab = "Count", las = 2)
 
-barplot(height = jabberwocky.table3, 
-        main = "Jabberwocky Word Count (Token Frequency > 1)",
-        ylab = "Raw Token Frequency", ylim = c(0, 20), las = 2)
+# Mosaic plot is the best choice for visualizing "the distribution of counts";
+# in the Jabberwocky corpus, the number of word types varies by whether a word
+# type represents a real word or not and whether a word type represents a
+# content word or a function word.
 
-jabberwocky.df = as.data.frame(jabberwocky.table)
-head(jabberwocky.df)
-colnames(jabberwocky.df) = c("Word", "Count")
-
+# We need the data from these variables from the first half of the script
 jabberwocky.wordCat = loadCourseCSV(2025, "3_Data", "jabberwocky_words_cat.csv")
 head(jabberwocky.wordCat)
 
@@ -270,4 +371,8 @@ head(jabberwocky.all)
 jabberwocky.xtabs = xtabs(~ Real + Cat, jabberwocky.all)
 jabberwocky.xtabs
 
-mosaicplot(x = jabberwocky.xtabs)
+# The special parameter used in mosaicplot() is "color", and check p.23 of the
+# handout for explanations.
+mosaicplot(x = jabberwocky.xtabs, main = "Jabberwocky Word Types Distribution",
+           xlab = "Read Word", ylab = "Word Category", 
+           color = c("white", "grey40"))
