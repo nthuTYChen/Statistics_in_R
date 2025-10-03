@@ -137,3 +137,137 @@ pnorm(q = -3) * 2
 # The bottom line is +-2SD from the mean
 # A total chance of 4.6% to randomly sample a value below/above +-2SD from the mean
 pnorm(q = -2) * 2
+
+pref.dur.mean = mean(durationsOnt$DurationOfPrefix)
+pref.dur.sd = sd(durationsOnt$DurationOfPrefix)
+
+pref.dur.upper = pref.dur.mean + pref.dur.sd * 2.5
+pref.dur.lower = pref.dur.mean - pref.dur.sd * 2.5
+
+outliers = durationsOnt$DurationOfPrefix < pref.dur.lower |
+  durationsOnt$DurationOfPrefix > pref.dur.upper
+
+sum(outliers)
+
+durationsOnt[outliers, 1:6]
+
+durationsOnt$DurPref.sd = 
+  (durationsOnt$DurationOfPrefix - pref.dur.mean) / pref.dur.sd
+
+outliers.sd = durationsOnt$DurPref.sd < -2.5 | 
+  durationsOnt$DurPref.sd > 2.5
+
+sum(outliers.sd)
+
+durationsOnt[outliers.sd, 1:6]
+
+durationsOnt$Freq.raw = exp(durationsOnt$Frequency)
+
+head(durationsOnt$Freq.raw)
+
+par(mfrow = c(1, 2))
+plot(density(durationsOnt$Freq.raw),
+     main = "Raw Frequency of ont- Words (Density)")
+qqnorm(durationsOnt$Freq.raw,
+       main = "Raw Frequency of ont- Words (Q-Q Plot)")
+qqline(durationsOnt$Freq.raw, col = "red", lwd = 1.5)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(1, 2))
+plot(density(durationsOnt$Frequency),
+     main = "Log Frequency of ont- Words (Density)")
+qqnorm(durationsOnt$Frequency,
+       main = "Log Frequency of ont- Words (Q-Q Plot)")
+qqline(durationsOnt$Frequency, col = "red", lwd = 1.5)
+par(mfrow = c(1, 1))
+
+log(c(0.5, 1, 2, 4, 8))
+log(c(200, 400, 800))
+
+durationsOnt$Freq.cat = 
+  ifelse(test = durationsOnt$Frequency >= median(durationsOnt$Frequency),
+         yes = "High", no = "Low")
+
+head(durationsOnt[c("Word", "Frequency", "Freq.cat")])
+
+aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = mean, data = durationsOnt)
+aggregate(x = DurationOfPrefix ~ Freq.cat, FUN = sd, data = durationsOnt)
+
+cor(durationsOnt$Frequency, durationsOnt$DurationOfPrefix)
+
+Myers.sample = loadCourseCSV(2025, "3_Data", "Myers_2015_Sample.csv")
+
+Myers.noResp = subset(Myers.sample, RT == 0)
+head(Myers.noResp)
+nrow(Myers.noResp)
+
+Myers.resp = subset(Myers.sample, RT > 0)
+nrow(Myers.resp)
+
+Myers.noShortRT = subset(Myers.resp, RT > 200)
+nrow(Myers.noShortRT) - nrow(Myers.resp)
+
+plot(density(Myers.noShortRT$RT), main = "Raw RT Distribution in Myers (2015)")
+
+Myers.noShortRT$logRT = log(Myers.noShortRT$RT)
+
+plot(density(Myers.noShortRT$logRT), 
+     main = "Log RT Distribution in Myers (2015)")
+
+Myers.logrt.mean = mean(Myers.noShortRT$logRT)
+Myers.logrt.sd = sd(Myers.noShortRT$logRT)
+
+Myers.noShortRT$logRT.sd = 
+  (Myers.noShortRT$logRT - Myers.logrt.mean) / Myers.logrt.sd
+
+Myers.sd25 = subset(Myers.noShortRT, logRT.sd >= -2.5 & logRT.sd <= 2.5)
+nrow(Myers.sd25) - nrow(Myers.noShortRT)
+
+plot(density(Myers.sd25$logRT), 
+     main = "Log RT without Outliers in Myers (2015)")
+
+Myers.acc = aggregate(x = Response ~ ItemID + Item_ZhuyinFuhao,
+                      FUN = mean, data = Myers.sd25)
+head(Myers.acc)
+
+acc.row.sorted = order(Myers.acc$Response, decreasing = T)
+head(acc.row.sorted)
+
+Myers.acc.ord = Myers.acc[acc.row.sorted,]
+head(Myers.acc.ord)
+tail(Myers.acc.ord)
+
+aggregate(Response ~ Session + Participant, FUN = mean, data = Myers.sd25)
+
+jabberwocky.wd = loadCourseCSV(2025, "3_Data", "jabberwocky_words.txt")
+head(jabberwocky.wd)
+jabberwocky.table = table(jabberwocky.wd$Word)
+head(jabberwocky.table)
+
+jabberwocky.table2 = jabberwocky.table[jabberwocky.table > 1]
+head(jabberwocky.table2)
+
+jabberwocky.table.ord = order(jabberwocky.table2, decreasing = T)
+head(jabberwocky.table.ord)
+
+jabberwocky.table3 = jabberwocky.table2[jabberwocky.table.ord]
+head(jabberwocky.table3)
+
+barplot(height = jabberwocky.table3, 
+        main = "Jabberwocky Word Count (Token Frequency > 1)",
+        ylab = "Raw Token Frequency", ylim = c(0, 20), las = 2)
+
+jabberwocky.df = as.data.frame(jabberwocky.table)
+head(jabberwocky.df)
+colnames(jabberwocky.df) = c("Word", "Count")
+
+jabberwocky.wordCat = loadCourseCSV(2025, "3_Data", "jabberwocky_words_cat.csv")
+head(jabberwocky.wordCat)
+
+jabberwocky.all = merge(jabberwocky.df, jabberwocky.wordCat, by = "Word")
+head(jabberwocky.all)
+
+jabberwocky.xtabs = xtabs(~ Real + Cat, jabberwocky.all)
+jabberwocky.xtabs
+
+mosaicplot(x = jabberwocky.xtabs)
