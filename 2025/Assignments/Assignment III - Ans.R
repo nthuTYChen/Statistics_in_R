@@ -25,7 +25,7 @@ sd(english$FamilySize) # The same number
 # separated from the rest of the distribution by the family size of 3.42996.
 # In other words, in this normal distribution, the area beyond 3.42996 only
 # covers 2.5% of the entire distribution.
-qnorm(p = .025, mean = family.mean, sd = family.sd, lower.tail = F) # 3.42996
+qnorm(p = .025, mean = family.mean, sd = family.sd, lower.tail = F) # 3.429496
 
 # Task 3
 # In the same normal distribution, the area below the familiy size of .8 covers
