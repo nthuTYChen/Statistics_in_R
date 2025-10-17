@@ -1,11 +1,11 @@
 # Starting in this unit, we always start by loading this script I created for you,
 # which load a function loadCourseCSV() to help retrieve data sets from my GitHub
 # repository
-source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 
 # Working on the corpus/count data: Jabberwocky from Alice in Wonderland
 # Load a list of individual word tokens
-jabberwocky.wd = loadCourseCSV(2024, "3_Data", "jabberwocky_words.txt")
+jabberwocky.wd = loadCourseCSV(2025, "3_Data", "jabberwocky_words.txt")
 
 # The number of rows in this data frame represents the number of word tokens
 # in the Jabberwocky corpus.
@@ -376,3 +376,103 @@ jabberwocky.xtabs
 mosaicplot(x = jabberwocky.xtabs, main = "Jabberwocky Word Types Distribution",
            xlab = "Read Word", ylab = "Word Category", 
            color = c("white", "grey40"))
+
+Myers.sample = loadCourseCSV(2025, "3_Data", "Myers_2015_Sample.csv")
+Myers.resp = subset(Myers.sample, RT > 0)
+Myers.resp$logRT = log(Myers.resp$RT)
+
+boxplot(Myers.resp$logRT, main = "log RT Distribution in Myers (2015) Sample",
+        ylab = "log Reaction Time")
+
+boxplot(logRT ~ Session, data = Myers.resp, 
+        main = "log RT Distribution by Session in Myers (2015) Sample",
+        xlab = "Session", ylab = "log Reaction Time")
+
+library(languageR)
+head(durationsOnt)
+
+plot(DurationOfPrefix ~ Frequency, data = durationsOnt,
+     main = "Frequency-Duration Correlation in durationsOnt",
+     xlab = "log Word Frequency per Million",
+     ylab = "ont- Prefix Duration (s)", ylim = c(0, 0.3))
+
+dursOnt.m = subset(durationsOnt, Sex == "male")
+dursOnt.f = subset(durationsOnt, Sex == "female")
+
+plot(DurationOfPrefix ~ Frequency, data = dursOnt.m,
+     main = "Frequency-Duration Correlation by Gender",
+     xlab = "log Word Frequency per Million",
+     ylab = "ont- Prefix Duration (s)", xlim = c(0, 7), ylim = c(0, 0.3))
+
+points(DurationOfPrefix ~ Frequency, data = dursOnt.f, pch = 2, col = "red")
+
+legend(title = "Sex", legend = c("Male", "Female"), pch = c(1, 2),
+       col = c("black", "red"), x = "bottom", ncol = 2, bty = "n", cex = 0.8)
+
+library(ggplot2)
+
+jabberwocky.wd = loadCourseCSV(2025, "3_Data", "jabberwocky_words.txt")
+head(jabberwocky.wd)
+jabberwocky.table = table(jabberwocky.wd$Word)
+head(jabberwocky.table)
+
+# Since there are too many word types in the Jabberwocky frequency table,
+# we extract the subset with a token frequency above 1.
+jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
+
+jabberwocky.2.df = as.data.frame(jabberwocky.table.2)
+head(jabberwocky.2.df)
+colnames(jabberwocky.2.df) = c("Word", "Count")
+
+rows.ord = order(jabberwocky.2.df$Count, decreasing = T)
+jabberwocky.2.df.ord = jabberwocky.2.df[rows.ord,]
+head(jabberwocky.2.df.ord)
+
+ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Count)) +
+  geom_bar(stat = "count")
+
+ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Word, y = Count)) +
+  geom_bar(stat = "identity") + coord_flip() +
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) + 
+  scale_x_discrete(limits = jabberwocky.2.df.ord$Word) +
+  labs(x = "Word Type", y = "Token Frequency", title = "Jabberwocky Corpus",
+       caption = "Token Frequency > 1 Only") + theme_bw()
+
+jabberwocky.2.df.ord$Frequency = ifelse(jabberwocky.2.df.ord$Count > 2,
+                                        yes = "> 2", no = "= 2")
+head(jabberwocky.2.df.ord)
+
+ggplot(data = jabberwocky.2.df.ord, 
+       mapping = aes(x = Word, y = Count, fill = Frequency)) +
+  geom_bar(stat = "identity") + coord_flip() +
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) + 
+  scale_x_discrete(limits = jabberwocky.2.df.ord$Word) +
+  labs(x = "Word Type", y = "Token Frequency", title = "Jabberwocky Corpus",
+       caption = "Token Frequency > 1 Only") + theme_bw()
+
+head(Myers.resp)
+Myers.resp$Session = as.factor(Myers.resp$Session)
+
+ggplot(data = Myers.resp, mapping = aes(x = Session, y = logRT)) +
+  geom_point(mapping = aes(color = Session), alpha = 0.1, size = 3, 
+             position = position_jitterdodge(jitter.width = 1)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  scale_y_continuous(limits = c(0, 10)) +
+  labs(title = "Wordlikeness Judgment Latency in Myers' Sample",
+       caption = "Whiskers = IQR * 1.5 from the 1st/3rd quartile",
+       x = "Session", y = "log Reaction Time") +
+  guides(color = "none") + theme_classic()
+
+ggplot(data = durationsOnt, 
+       mapping = aes(x = Frequency, y = DurationOfPrefix, color = Sex,
+                     shape = Sex)) +
+  geom_point()
+
+ggplot(data = durationsOnt, 
+       mapping = aes(x = Frequency, y = DurationOfPrefix)) +
+  geom_point(color = "grey40", size = 3, alpha = 0.7) +
+  facet_grid(. ~ Sex) +
+  scale_y_continuous(limits = c(0, 0.3)) + 
+  labs(title = "Frequency-Prefix Duration Correlation in durationsOnt",
+       caption = "Word frequency per million is log-transformed",
+       x = "Word Frequency", y = "Duration (s)") + theme_bw()
