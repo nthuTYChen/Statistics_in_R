@@ -23,19 +23,19 @@ jabberwocky.df = as.data.frame(jabberwocky.table)
 head(jabberwocky.df)
 
 # Replace the original column names ["Var1", "Freq"] with another vector
-# ["Word", "Count"] to have more proper column names in the data frame.
-colnames(jabberwocky.df) = c("Word", "Count")
+# ["Word", "Freq"] to have more proper column names in the data frame.
+colnames(jabberwocky.df) = c("Word", "Freq")
 
 # In this new data frame, each row represents an observation on a word type
 # in the corpus and the token number of the word type.
 nrow(jabberwocky.df)
 # The sum of token frequencies is still equivalent to the original corpus size,
 # namely the number of word tokens in the corpus.
-sum(jabberwocky.df$Count)
+sum(jabberwocky.df$Freq)
 
 # Apply the order() function to the Count column of the new data frame to get
 # the number of rows sorted based on the Count values in decreasing order.
-order(jabberwocky.df$Count, decreasing = T)
+order(jabberwocky.df$Freq, decreasing = T)
 # The first row number in the above output is 71, and the 71st row in the
 # data frame is the word type with the highest token frequency (the, 19 times)
 jabberwocky.df[71,]
@@ -44,7 +44,7 @@ jabberwocky.df[71,]
 jabberwocky.df[2,]
 
 # Save the re-ordered row numbers separately.
-count.des.ord = order(jabberwocky.df$Count, decreasing = T)
+count.des.ord = order(jabberwocky.df$Freq, decreasing = T)
 
 # Use the re-ordered row numbers to sort the original data frame and get a re-ordered
 # data frame.
@@ -354,7 +354,7 @@ jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
 # explained on p.21 of the handout.
 barplot(height = jabberwocky.table.2, ylim = c(0, 20),
         main = "Jabberwocky Word Count (Token Freq > 1)", xlab = "",
-        ylab = "Count", las = 2)
+        ylab = "Token Frequency", las = 2)
 
 # Mosaic plot is the best choice for visualizing "the distribution of counts";
 # in the Jabberwocky corpus, the number of word types varies by whether a word
@@ -377,25 +377,46 @@ mosaicplot(x = jabberwocky.xtabs, main = "Jabberwocky Word Types Distribution",
            xlab = "Read Word", ylab = "Word Category", 
            color = c("white", "grey40"))
 
+# Load the Myers' sample data set again for boxplots
 Myers.sample = loadCourseCSV(2025, "3_Data", "Myers_2015_Sample.csv")
+# Exclude rows without a valid response and log-transform RT as usual
 Myers.resp = subset(Myers.sample, RT > 0)
 Myers.resp$logRT = log(Myers.resp$RT)
 
+# A box plot is the best choice for visualizing continuous data since it shows
+# all the distributional properties of the data: Median, the range from the 
+# 1st quartile to the 3rd quartile, an extended range based on IQR, and outliers.
+# Check p.24 of the handout to see how to read a box plot.
+
+# In this demo, we plot the entire log RTs distribution
 boxplot(Myers.resp$logRT, main = "log RT Distribution in Myers (2015) Sample",
         ylab = "log Reaction Time")
 
+# In this demo, we plot log RTs grouped by Session, thus the y ~ x syntax again.
 boxplot(logRT ~ Session, data = Myers.resp, 
         main = "log RT Distribution by Session in Myers (2015) Sample",
         xlab = "Session", ylab = "log Reaction Time")
 
+# Load the durationsOnt data set of the languageR package again for the scatterplot
 library(languageR)
 head(durationsOnt)
+
+# We see the y ~ x syntax again, because in a correlation test, we want to know
+# if y changes with x. In this case, we once again explore the correlation between
+# the duration of the ont- prefix and log word frequency. Note that DurationOfPrefix
+# is indeed mapped to the y-axis and Frequency to the x-axis in the scatter plot!
+# We also expand the range of the y-axis a little bit to (1) leave some blanks
+# at the top and the bottom to make our plot more readable and (2) reduce the 
+# distance between individual data points to make a weak trend more visible.
 
 plot(DurationOfPrefix ~ Frequency, data = durationsOnt,
      main = "Frequency-Duration Correlation in durationsOnt",
      xlab = "log Word Frequency per Million",
      ylab = "ont- Prefix Duration (s)", ylim = c(0, 0.3))
 
+# Check if male speakers and female speakers show a similar correlation. See
+# p.24-25 for the explanation of the assumption as well as detailed explanations
+# of the R codes below.
 dursOnt.m = subset(durationsOnt, Sex == "male")
 dursOnt.f = subset(durationsOnt, Sex == "female")
 
@@ -409,8 +430,10 @@ points(DurationOfPrefix ~ Frequency, data = dursOnt.f, pch = 2, col = "red")
 legend(title = "Sex", legend = c("Male", "Female"), pch = c(1, 2),
        col = c("black", "red"), x = "bottom", ncol = 2, bty = "n", cex = 0.8)
 
+# Introducing and loading the ggplot2 package
 library(ggplot2)
 
+# Load the jabberwocky word list for barplots.
 jabberwocky.wd = loadCourseCSV(2025, "3_Data", "jabberwocky_words.txt")
 head(jabberwocky.wd)
 jabberwocky.table = table(jabberwocky.wd$Word)
@@ -422,26 +445,45 @@ jabberwocky.table.2 = jabberwocky.table[jabberwocky.table > 1]
 
 jabberwocky.2.df = as.data.frame(jabberwocky.table.2)
 head(jabberwocky.2.df)
-colnames(jabberwocky.2.df) = c("Word", "Count")
+colnames(jabberwocky.2.df) = c("Word", "Freq")
 
-rows.ord = order(jabberwocky.2.df$Count, decreasing = T)
+# Sort the new data frame by the Count column in decreasing order, so we can
+# also arrange the bars in the plot later.
+
+# Get the re-ordered row numbers first
+rows.ord = order(jabberwocky.2.df$Freq, decreasing = T)
+# Use the re-ordered row numbers to obtain a sorted data frame.
 jabberwocky.2.df.ord = jabberwocky.2.df[rows.ord,]
 head(jabberwocky.2.df.ord)
 
-ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Count)) +
+# This first demo is not covered in the handout, so a detailed explanation is
+# provided.
+
+# In the core ggplot() function, the data source is specified, and the mapping
+# is only between the Freq variable and the x-axis, so each tick of the x-axis
+# represent a token frequency. Then, geom_bar() is set to have be stat = "count",
+# which means it will automatically count the number of a token frequency
+# in the Freq variable. The height of a bar mapped to the y-axis is thus 
+# determined by the number of word types with the same token frequency (i.e.,
+# you get frequency counts of token frequencies).
+ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Freq)) +
   geom_bar(stat = "count")
 
-ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Word, y = Count)) +
+ggplot(data = jabberwocky.2.df.ord, mapping = aes(x = Word, y = Freq)) +
   geom_bar(stat = "identity") + coord_flip() +
   scale_y_continuous(expand = c(0.01, 0.01), limits = c(0, 20)) + 
   scale_x_discrete(limits = jabberwocky.2.df.ord$Word) +
   labs(x = "Word Type", y = "Token Frequency", title = "Jabberwocky Corpus",
        caption = "Token Frequency > 1 Only") + theme_bw()
 
-jabberwocky.2.df.ord$Frequency = ifelse(jabberwocky.2.df.ord$Count > 2,
+# Group word types into two categories in the variable FreqCat based on whether
+# token frequency is higher than 2.
+jabberwocky.2.df.ord$FreqCat = ifelse(jabberwocky.2.df.ord$Freq > 2,
                                         yes = "> 2", no = "= 2")
 head(jabberwocky.2.df.ord)
 
+# A new mapping here is between Frequency and "fill" (i.e., the colors used
+# to fill the bars)
 ggplot(data = jabberwocky.2.df.ord, 
        mapping = aes(x = Word, y = Count, fill = Frequency)) +
   geom_bar(stat = "identity") + coord_flip() +
@@ -450,27 +492,38 @@ ggplot(data = jabberwocky.2.df.ord,
   labs(x = "Word Type", y = "Token Frequency", title = "Jabberwocky Corpus",
        caption = "Token Frequency > 1 Only") + theme_bw()
 
+# Create a boxplot that also presents individual data points in Myers.resp
 head(Myers.resp)
+# Convert the Session variable into a factor (i.e., discrete variable) so
+# 1 and 2 are not treated as numbers by ggplot2.
 Myers.resp$Session = as.factor(Myers.resp$Session)
 
 ggplot(data = Myers.resp, mapping = aes(x = Session, y = logRT)) +
   geom_point(mapping = aes(color = Session), alpha = 0.1, size = 3, 
              position = position_jitterdodge(jitter.width = 1)) +
+  # Add boxplots after individual data points so the boxes stay on the top.
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
   scale_y_continuous(limits = c(0, 10)) +
+  # \n represents a line breaking
   labs(title = "Wordlikeness Judgment Latency in Myers' Sample",
-       caption = "Whiskers = IQR * 1.5 from the 1st/3rd quartile",
+       caption = "Whiskers = IQR * 1.5 from the 1st/3rd quartile\n
+       or the minimal/maximal value",
        x = "Session", y = "log Reaction Time") +
   guides(color = "none") + theme_classic()
 
+# Create a scatter plot showing the overall frequency-duration correlation
 ggplot(data = durationsOnt, 
        mapping = aes(x = Frequency, y = DurationOfPrefix, color = Sex,
                      shape = Sex)) +
   geom_point()
 
+# Create a scatter plot showing the frequency-duration correlation for different
+# group of speakers categorized by Sex
 ggplot(data = durationsOnt, 
        mapping = aes(x = Frequency, y = DurationOfPrefix)) +
   geom_point(color = "grey40", size = 3, alpha = 0.7) +
+  # facet_grid() takes the Row ~ Column syntax, so here the scatter plot is 
+  # divided into two columns based on the two levels in Sex
   facet_grid(. ~ Sex) +
   scale_y_continuous(limits = c(0, 0.3)) + 
   labs(title = "Frequency-Prefix Duration Correlation in durationsOnt",
