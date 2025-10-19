@@ -40,14 +40,14 @@ dur.yob.median = median(durationsOnt$YearOfBirth)
 # either "Old" or "Young" based on the check result, and the entire vector is
 # stored to the Generation variable.
 durationsOnt$Generation = ifelse(durationsOnt$YearOfBirth >= dur.yob.median,
-                                 yes = "Old", no = "Young")
+                                 yes = "Young", no = "Old")
 
 # Task 4
 # Use aggregate() to sort the continuous variable SpeechRate based on the 
 # categorical variable Generation, and then apply the mean() function to each
 # subset of SpeechRate.
-# For older speakers, it's 5.82 syllables per second on average, and for younger
-# speakers, it's 5.24 syllables per second on average, so older speakers are
+# For older speakers, it's 5.24 syllables per second on average, and for younger
+# speakers, it's 5.82 syllables per second on average, so older speakers are
 # faster on average.
 aggregate(SpeechRate ~ Generation, FUN = mean, data = durationsOnt)
 
@@ -56,10 +56,10 @@ aggregate(SpeechRate ~ Generation, FUN = mean, data = durationsOnt)
 durOnt.old = subset(durationsOnt, Generation == "Old")
 durOnt.young = subset(durationsOnt, Generation == "Young")
 # Get the SpeechRate mean and SD for each subset; spr = Speech Rate
-old.spr.mean = mean(durOnt.old$SpeechRate) # 5.82
-old.spr.sd = sd(durOnt.old$SpeechRate) # 1.21
-young.spr.mean = mean(durOnt.young$SpeechRate) # 5.24
-young.spr.sd = sd(durOnt.young$SpeechRate) # 1.24
+old.spr.mean = mean(durOnt.old$SpeechRate) # 5.24
+old.spr.sd = sd(durOnt.old$SpeechRate) # 1.24
+young.spr.mean = mean(durOnt.young$SpeechRate) # 5.82
+young.spr.sd = sd(durOnt.young$SpeechRate) # 1.21
 
 # Check the range of the entire SpeechRate variable, so I can set a reasonable
 # x-axis limits.
