@@ -498,9 +498,11 @@ head(Myers.resp)
 # 1 and 2 are not treated as numbers by ggplot2.
 Myers.resp$Session = as.factor(Myers.resp$Session)
 
+Myers.resp$logRT = log(Myers.resp$RT)
+
 ggplot(data = Myers.resp, mapping = aes(x = Session, y = logRT)) +
-  geom_point(mapping = aes(color = Session), alpha = 0.1, size = 3, 
-             position = position_jitterdodge(jitter.width = 1)) +
+  geom_point(alpha = 0.3, size = 1.5, color = "lightgrey", 
+             position = position_jitter(width = .2)) +
   # Add boxplots after individual data points so the boxes stay on the top.
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
   scale_y_continuous(limits = c(0, 10)) +
