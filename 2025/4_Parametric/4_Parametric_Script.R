@@ -180,3 +180,93 @@ p.lower * 2
 
 # Validate the r statistics using cor.test() with raw sample data.
 cor.test(x = freq.z, y = dur.z)
+
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
+Myers.clean = loadCourseCSV(2025, "4_Parametric", "MyersClean.csv")
+
+s1.rt = Myers.clean[Myers.clean$Session == 1,]$logRT
+s2.rt = Myers.clean[Myers.clean$Session == 2,]$logRT
+
+head(s1.rt)
+
+t.test(s1.rt, s2.rt, var = TRUE)
+
+length(s1.rt)
+length(s2.rt)
+
+6751 + 7201 - 2
+
+var.test.res = var.test(x = s1.rt, y = s2.rt)
+var.test.res$p.value
+
+set.seed(10)
+norm.x = rnorm(n = 100, mean = 0, sd = 1)
+set.seed(49)
+norm.y = rnorm(n = 100, mean = 0, sd = 1)
+
+var.test.norm = var.test(x = norm.x, y = norm.y)
+var.test.norm$p.value
+
+t.test(x = s1.rt, y = s2.rt)
+
+t.test(logRT ~ Session, data = Myers.clean)
+
+overgen = loadCourseCSV(2025, "4_Parametric", "overgen.csv")
+head(overgen)
+
+newRowNums = order(overgen$Subj, overgen$Age)
+overgen.ord = overgen[newRowNums,]
+head(overgen.ord)
+
+overgen.2 = subset(overgen.ord, Age == "Two")
+overgen.3 = subset(overgen.ord, Age == "Three")
+
+error.diff = overgen.3$ErrorN - overgen.2$ErrorN
+head(error.diff)
+
+diff.mean = mean(error.diff)
+diff.sd = sd(error.diff)
+diff.se = diff.sd / sqrt(length(error.diff))
+diff.df = length(error.diff) - 1
+
+overgen.t = diff.mean / diff.se
+overgen.p = pt(q = overgen.t, df = diff.df)
+overgen.p
+overgen.p * 2
+
+t.test(x = overgen.3$ErrorN, y = overgen.2$ErrorN, paired = TRUE)
+
+t.test(x = overgen.3$ErrorN, y = overgen.2$ErrorN)
+
+mean.pop = 300
+sd.pop = 40
+mean.sample = 320
+n = 10
+se = sd.pop / sqrt(n)
+
+ci.upper = mean.sample + 1.96 * se
+ci.lower = mean.sample - 1.96 * se
+
+diff.mean
+
+qt(p = 0.025, df = 29)
+
+ci.diff.upper = diff.mean + 2.04523 * diff.se
+ci.diff.lower = diff.mean - 2.04523 * diff.se
+
+mean.pop = 300
+mean.sample = 325.8
+sd.sample = 38.09
+
+abs(300 - 325.8) / sd.sample
+
+s1.rt.mean = mean(s1.rt)
+s2.rt.mean = mean(s2.rt)
+all.rt.sd = sd(Myers.clean$logRT)
+
+abs(s1.rt.mean - s2.rt.mean) / all.rt.sd
+
+diff.mean
+diff.sd
+
+abs(diff.mean) / diff.sd
