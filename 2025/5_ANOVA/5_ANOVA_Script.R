@@ -218,3 +218,59 @@ TukeyHSD(sl.rep.aov.rp)
 # Run the paired t-tests yourself following the Unit 5 handout to see which
 # difference is significant at the level of .05 / 3.
 .05 / 3
+
+
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
+chen.sample = loadCourseCSV(2025, "5_ANOVA", "Chen2020Sample.csv")
+str(chen.sample)
+
+chen.aov = aov(formula = Accept ~ Group * InitialTone, data = chen.sample)
+summary(chen.aov)
+
+chen.aov2 = aov(formula = Accept ~ Group + InitialTone + Group:InitialTone,
+                data = chen.sample)
+summary(chen.aov)
+
+xtabs(~ Group + InitialTone, data = chen.sample)
+
+chen.sample.n = 1536
+
+chen.sample.mean = mean(chen.sample$Accept)
+
+aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
+
+aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
+
+aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
+
+chen.sample.n * (0.4602865 - 0.4947917 - 0.5361328 + chen.sample.mean) ^ 2 +
+  chen.sample.n * (0.6119792 - 0.5283203 - 0.5361328 + chen.sample.mean) ^ 2 +
+  chen.sample.n * (0.5292969 - 0.4947917 - 0.4869792 + chen.sample.mean) ^ 2 +
+  chen.sample.n * (0.4446615 - 0.5283203 - 0.4869792 + chen.sample.mean) ^ 2
+
+(2 - 1) * (2 - 1)
+
+21.44677 / 0.2456515
+
+chen.aov3 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample)
+summary(chen.aov3)
+
+chen.sample.no_h_r = 
+  subset(chen.sample, !(InitialTone == "H" & Group == "NonFinalR"))
+
+chen.sample.h_r = subset(chen.sample, InitialTone == "H" & Group == "NonFinalR")
+
+chen.unbalanced = rbind(chen.sample.no_h_r, chen.sample.h_r[1:100,])
+
+xtabs(~ Group + InitialTone, data = chen.unbalanced)
+
+chen.aov4 = aov(formula = Accept ~ Group * InitialTone, data = chen.unbalanced)
+chen.aov5 = aov(formula = Accept ~ InitialTone * Group, data = chen.unbalanced)
+summary(chen.aov4)
+summary(chen.aov5)
+
+summary(chen.aov3)
+
+3.7 / sum(3.7, 1.7, 21.4, 1508.3)
+1.7 / sum(3.7, 1.7, 21.4, 1508.3)
+21.4 / sum(3.7, 1.7, 21.4, 1508.3)
