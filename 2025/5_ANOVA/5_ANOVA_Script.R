@@ -219,58 +219,86 @@ TukeyHSD(sl.rep.aov.rp)
 # difference is significant at the level of .05 / 3.
 .05 / 3
 
-
+# Two-way independent-measures ANOVA
+# Check the Unit 5 handout for (1) the explanations of interactions between
+# two independent variables and (2) the introduction to Chen's (2020) study
+# related to the sample data set.
 source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 chen.sample = loadCourseCSV(2025, "5_ANOVA", "Chen2020Sample.csv")
 str(chen.sample)
 
+# Build a two-way independent-measures ANOVA model
 chen.aov = aov(formula = Accept ~ Group * InitialTone, data = chen.sample)
+# See also the Unit 5 handout for the detailed explanation of the output
 summary(chen.aov)
 
+# Group * InitialTone = Group + InitialTone + Group:InitialTone. Put differently,
+# the model has two main effects and a two-way interaction.
 chen.aov2 = aov(formula = Accept ~ Group + InitialTone + Group:InitialTone,
                 data = chen.sample)
+# The output is exactly the same
 summary(chen.aov)
 
+# Manually calculate the variance of the potential interaction effect
+# Get the number of data points in each crossing between two levels from each
+# independent variable
 xtabs(~ Group + InitialTone, data = chen.sample)
 
+# The number of data points is the same in each crossing - we have a perfectly
+# balanced data set, so we can set the same sample size for each crossing.
+# However, if the data is unbalanced, you need to set different sample size numbers
+# for each crossing. See formula (14) on p.16.
 chen.sample.n = 1536
-
+# Get the grand mean acceptability
 chen.sample.mean = mean(chen.sample$Accept)
 
+# Get the means of each crossover between Group and InitialTone
 aggregate(Accept ~ Group + InitialTone, FUN = mean, data = chen.sample)
-
+# Get the means of each level of Group/InitialTone
 aggregate(Accept ~ Group, FUN = mean, data = chen.sample)
-
 aggregate(Accept ~ InitialTone, FUN = mean, data = chen.sample)
 
+# Calculate the interaction SS with the numbers obtained above following the 
+# formula (14) (the simplified version).
 chen.sample.n * (0.4602865 - 0.4947917 - 0.5361328 + chen.sample.mean) ^ 2 +
   chen.sample.n * (0.6119792 - 0.5283203 - 0.5361328 + chen.sample.mean) ^ 2 +
   chen.sample.n * (0.5292969 - 0.4947917 - 0.4869792 + chen.sample.mean) ^ 2 +
   chen.sample.n * (0.4446615 - 0.5283203 - 0.4869792 + chen.sample.mean) ^ 2
 
+# The df of the interaction term
 (2 - 1) * (2 - 1)
 
+# Validate the F value: MS-interaction/MS-error
 21.44677 / 0.2456515
 
+# Check the effect of variable order in ANOVA. With a perfectly balanced data set
+# the stats of the two main effects are the same (compared to chen.aov).
 chen.aov3 = aov(formula = Accept ~ InitialTone * Group, data = chen.sample)
 summary(chen.aov3)
 
+# Create an unbalanced data set
+# First, exclude the InitialTone:H & Group:NonFinalR subset  
 chen.sample.no_h_r = 
   subset(chen.sample, !(InitialTone == "H" & Group == "NonFinalR"))
-
+# Second, get the InitialTone:H & Group:NonFinalR subset
 chen.sample.h_r = subset(chen.sample, InitialTone == "H" & Group == "NonFinalR")
-
+# Combine the data set without the InitialTone:H & Group:NonFinalR subset and
+# only the first 100 observation of the same subset.
 chen.unbalanced = rbind(chen.sample.no_h_r, chen.sample.h_r[1:100,])
 
+# Check the unbalanced data distribution
 xtabs(~ Group + InitialTone, data = chen.unbalanced)
 
+# The order of independent variables now changes the stats of the two main effects.
+# The interaction stats remain unchanged. See pp.18-19 for detailed explanations.
 chen.aov4 = aov(formula = Accept ~ Group * InitialTone, data = chen.unbalanced)
 chen.aov5 = aov(formula = Accept ~ InitialTone * Group, data = chen.unbalanced)
 summary(chen.aov4)
 summary(chen.aov5)
 
-summary(chen.aov3)
-
-3.7 / sum(3.7, 1.7, 21.4, 1508.3)
-1.7 / sum(3.7, 1.7, 21.4, 1508.3)
-21.4 / sum(3.7, 1.7, 21.4, 1508.3)
+# Calculat eta-squares for the size of the two SIGNIFICANT main effects and the 
+# SIGNIFICANT two-way interaction based on the statistics in chen.aov. See
+# p.19-20 for detailed explanations.
+3.7 / sum(3.7, 1.7, 21.4, 1508.3) # <= 0.01; small effect
+1.7 / sum(3.7, 1.7, 21.4, 1508.3) # <= 0.01; small effect
+21.4 / sum(3.7, 1.7, 21.4, 1508.3) # 0.013; not-so-small effect
