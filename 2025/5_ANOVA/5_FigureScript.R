@@ -1,4 +1,4 @@
-source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 
 library(ggplot2)
 
@@ -25,7 +25,7 @@ ggplot(data = fdist.all, mapping = aes(x = x, y = y, color = df)) +
 
 # Figure 2
 
-sl.rep.sim = loadCourseCSV(2024, "5_ANOVA", "SaitoLysterRepSim.csv")
+sl.rep.sim = loadCourseCSV(2025, "5_ANOVA", "SaitoLysterRepSim.csv")
 sl.rep.avg = aggregate(rF3 ~ Subject + Condition, FUN = mean, data = sl.rep.sim)
 
 ggplot(data = sl.rep.sim, mapping = aes(x = Condition, y = rF3, fill = Condition)) +
@@ -66,7 +66,7 @@ ggplot(sim.all, aes(x = VarX, y = Value, fill = VarY)) +
   theme_bw()
 
 # Figure 4
-chen.sample = loadCourseCSV(2024, "5_ANOVA", "Chen2020Sample.csv")
+chen.sample = loadCourseCSV(2025, "5_ANOVA", "Chen2020Sample.csv")
 
 chen.avg = aggregate(Accept ~ participant + Group + InitialTone, FUN = mean, data = chen.sample)
 

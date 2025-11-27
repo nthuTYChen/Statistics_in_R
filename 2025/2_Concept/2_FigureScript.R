@@ -88,7 +88,7 @@ ggplot(data=norm, aes(x=z, y=Values)) +
 
 # Supplementary Materials 1
 
-source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/2024/Week3/distExamples.R")
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/2025/Week3/distExamples.R")
 
 dist.skewR.norm = dnorm(seq(58000:300000), mean = 129000, sd = 39718.07)
 

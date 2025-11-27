@@ -1,4 +1,4 @@
-source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 
 library(languageR)
 library(ggplot2)
@@ -122,7 +122,7 @@ ggplot(data = durationsOnt, mapping = aes(x = Plosive.fac,
   theme_bw()
 
 # Figure 7
-Myers.withNB = loadCourseCSV(2024, "6_Regression", "MyersWithNB.csv")
+Myers.withNB = loadCourseCSV(2025, "6_Regression", "MyersWithNB.csv")
 
 ggplot(data = Myers.withNB, mapping = aes(x = NB, y = Response)) +
   geom_point(color = "grey40", alpha = .7) +
@@ -143,23 +143,19 @@ ggplot(data = logistic.df, mapping = aes(x = Prob, y = Logits)) +
   theme_bw()
 
 # Figure 9
-logOdds = 0
-for(i in 1:100000) {
-  x = rbinom(n = 10000, size = 1, prob = .5)
-  n.1 = length(x[x==1])
-  p = n.1 / 10000
-  logOdds[i] = log(p / (1 - p))
-}
+success.den = dbinom(x = 1:9999, size = 10000, prob = .5)
 
-logOdds.df = data.frame(x = logOdds)
+prob.df = data.frame(success = 1:9999, density = success.den)
 
-ggplot() + geom_density(data = logOdds.df, mapping = aes(x = x), lwd = 2) +
-  scale_x_continuous(limits = c(-0.075, 0.075)) +
+prob.df$logit = log(prob.df$success / 10000 / (1 - prob.df$success / 10000))
+
+ggplot(subset(prob.df, logit >= -0.08 & logit <= 0.08), 
+       aes(x = logit, y = density)) + geom_line(linewidth = 2) +
   labs(x = "Logit", y = "Density", title = "Figure 9. Logit Distribution") +
   theme_bw()
 
 # Figure 10
-chen.sample = loadCourseCSV(2024, "6_Regression", "Chen2020Sample.csv")
+chen.sample = loadCourseCSV(2025, "6_Regression", "Chen2020Sample.csv")
 
 chen.sample$InitialTone_Fac = as.factor(chen.sample$InitialTone)
 chen.sample$Group_Fac = as.factor(chen.sample$Group)

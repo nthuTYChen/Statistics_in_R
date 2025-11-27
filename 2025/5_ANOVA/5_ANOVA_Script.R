@@ -1,5 +1,5 @@
 # Load the course script
-source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/main/courseUtil.R")
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 
 # Load the Myers' (2015) clean data set to revisit the test of equal variance
 # (aka F-test)
