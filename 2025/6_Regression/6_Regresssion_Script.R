@@ -118,3 +118,71 @@ summary(dur.lm.plo)
 # the linear regression model.
 mean(durationsOnt[durationsOnt$PlosivePresent == "yes",]$DurationPrefixNasal)
 mean(durationsOnt[durationsOnt$PlosivePresent == "no",]$DurationPrefixNasal)
+
+durationsOnt$Pl.Pr.Fac.sum = as.factor(durationsOnt$PlosivePresent)
+contrasts(durationsOnt$Pl.Pr.Fac.sum) = contr.sum(2)
+contrasts(durationsOnt$Pl.Pr.Fac.sum)
+
+contrasts(durationsOnt$Pl.Pr.Fac)
+
+dur.lm.plo.sum = lm(formula = DurationPrefixNasal ~ Pl.Pr.Fac.sum, 
+                    data = durationsOnt)
+summary(dur.lm.plo.sum)
+
+t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, data = durationsOnt)
+
+dur.lm.aov = aov(DurationPrefixNasal ~ PlosivePresent, data = durationsOnt)
+summary(dur.lm.aov)
+
+head(english)
+english.sub = subset(english, WordCategory == "N")
+nrow(english.sub)
+
+english.sub = english.sub[c("RTlexdec", "NounFrequency", "Familiarity", "Word")]
+head(english.sub)
+
+range(english.sub$NounFrequency)
+
+english.sub$NounFreq.log = log(english.sub$NounFrequency)
+head(english.sub)
+
+freq.mean = mean(english.sub$NounFreq.log)
+freq.sd = sd(english.sub$NounFreq.log)
+fam.mean = mean(english.sub$Familiarity)
+fam.sd = sd(english.sub$Familiarity)
+
+tail(subset(english.sub, NounFreq.log < freq.mean - freq.sd &
+              Familiarity > fam.mean + fam.sd))
+
+english.lm = lm(RTlexdec ~ NounFreq.log + Familiarity, data = english.sub)
+summary(english.lm)
+
+english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
+summary(english.lm.freq)
+
+cor(english.sub$NounFreq.log, english.sub$Familiarity)
+
+set.seed(seed = 100)
+x = rnorm(n = 50)
+y = 10 + 3 * x + rnorm(n = 50)
+summary(lm(y ~ x))
+
+set.seed(seed = 200)
+x2 = x - rnorm(50) * 0.1
+cor(x, x2)
+
+summary(lm(y ~ x2))
+
+coll.lm = lm(y ~ x + x2)
+summary(coll.lm)
+
+install.packages("car", ask = F, dependencies = T)
+library(car)
+
+vif(coll.lm)
+
+vif(english.lm)
+nrow(english.sub)
+
+english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
+summary(english.lm.int)
