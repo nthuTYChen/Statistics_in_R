@@ -119,49 +119,86 @@ summary(dur.lm.plo)
 mean(durationsOnt[durationsOnt$PlosivePresent == "yes",]$DurationPrefixNasal)
 mean(durationsOnt[durationsOnt$PlosivePresent == "no",]$DurationPrefixNasal)
 
+# Replace the default dummy coding with sum coding using the contr.sum()
+# function and created a new variable Pl.Pr.Fac.sum. 
+# Check the Unit 6 handout on pp.10-11 for detailed explanations.
 durationsOnt$Pl.Pr.Fac.sum = as.factor(durationsOnt$PlosivePresent)
 contrasts(durationsOnt$Pl.Pr.Fac.sum) = contr.sum(2)
 contrasts(durationsOnt$Pl.Pr.Fac.sum)
-
+# Compare the sum-coding system with the dummy coding system
 contrasts(durationsOnt$Pl.Pr.Fac)
 
+# Create another model using the sum-coded predictor; the explanatory power
+# remains the same, but the intercept no longer represents either level of the
+# predictor.
 dur.lm.plo.sum = lm(formula = DurationPrefixNasal ~ Pl.Pr.Fac.sum, 
                     data = durationsOnt)
 summary(dur.lm.plo.sum)
 
+# The "linear regression" including a categorical predictor with two levels
+# is conceptually and mathematically associated to an unpaired two-sample
+# t-test assuming an equal variance. The latter is in fact the special form of
+# linear regression. Pay attention to the means and the t/p-value.
 t.test(DurationPrefixNasal ~ PlosivePresent, var = TRUE, data = durationsOnt)
 
+# Run an one-way independent-measures ANOVA to show that ANOVA is a special
+# form of linear regression, too. Pay attention to the F-value and the p-value.
 dur.lm.aov = aov(DurationPrefixNasal ~ PlosivePresent, data = durationsOnt)
 summary(dur.lm.aov)
 
+# Multiple Regression: Test the effects of noun frequency and familiarity
+# rating on the reaction times in the lexical decision task in the "english"
+# data set. Check the Unit 6 handout for why these two factors are potentially
+library(languageR)
 head(english)
+
+# We only focus on test items that are categorized as a noun in this data set,
+# so we can test the genuine effect of noun frequency
 english.sub = subset(english, WordCategory == "N")
 nrow(english.sub)
 
+# Include only columns with the crucial information we need here.
 english.sub = english.sub[c("RTlexdec", "NounFrequency", "Familiarity", "Word")]
 head(english.sub)
 
+# Check the range of our raw noun frequency to make sure that the minimal value
+# is not zero before log transformation, because log(0) = -infinity, which
+# causes some technical problems.
 range(english.sub$NounFrequency)
 
+# There is no zero in the raw noun frequencies, so just do log transformation
+# directly.
 english.sub$NounFreq.log = log(english.sub$NounFrequency)
 head(english.sub)
 
+# Although frequency is highly correlated with familiarity (if a word is used
+# more frequently, it is supposed to be a more familiar word), there are still
+# some exceptions. Let's try to find the nouns that have a relatively lower
+# frequency but a relatively higher familiarity.
 freq.mean = mean(english.sub$NounFreq.log)
 freq.sd = sd(english.sub$NounFreq.log)
 fam.mean = mean(english.sub$Familiarity)
 fam.sd = sd(english.sub$Familiarity)
-
+# frequency < mean - 1SD & familiarity > mean + 1SD
 tail(subset(english.sub, NounFreq.log < freq.mean - freq.sd &
               Familiarity > fam.mean + fam.sd))
 
+# Build a multiple regression with the predictors WITHOUT their interaction.
 english.lm = lm(RTlexdec ~ NounFreq.log + Familiarity, data = english.sub)
 summary(english.lm)
 
+# Build a multiple regression with only log noun frequency as the only predictor.
+# This model only explains 18.7% of the variance in the dependent variable,
+# which is about 4% less than the model with both predictors.
 english.lm.freq = lm(RTlexdec ~ NounFreq.log, data = english.sub)
 summary(english.lm.freq)
 
+# There's a strong correlation between noun frequency and familiarity as expected,
+# which leads to a potential linearity problem.
 cor(english.sub$NounFreq.log, english.sub$Familiarity)
 
+# Similulate the collinearity problem. Check the collinearity section of the
+# Unit 6 handout for explanations.
 set.seed(seed = 100)
 x = rnorm(n = 50)
 y = 10 + 3 * x + rnorm(n = 50)
@@ -177,12 +214,27 @@ coll.lm = lm(y ~ x + x2)
 summary(coll.lm)
 
 install.packages("car", ask = F, dependencies = T)
+# Use the vif() function of the "car" package to estimate the variance 
+# inflation factor and the seriousness of the collinearity problem.
 library(car)
-
+# VIF is above 110 for the model simulating the collinearity problem, which
+# is well above the more lenient threshold (i.e., 10) in the literature.
 vif(coll.lm)
 
+# VIF is below 3 for the real-world model, so the strong correlation between
+# noun frequency and familiarity is not a real issue.
 vif(english.lm)
+# The low VIF despite a high correlation between frequency and familiarity is
+# in part due to a large sample size. Regression modeling is powerful enough
+# to tease apart the independent effect of highly correlated predictors.
 nrow(english.sub)
 
+# Multiple regression with interactions; see Unit 6 handout for why we expect
+# an interaction between noun frequency and familiarity
+
+# Build the multiple regression model with the two-way interaction
+# As in ANOVA, NounFreq.log * Familiarity =  
+#                     NounFreq.log + Familiarity + NounFreq.log:Familiarity
 english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
+# Check the Unit 6 handout for detailed explanations of the model summary.
 summary(english.lm.int)
