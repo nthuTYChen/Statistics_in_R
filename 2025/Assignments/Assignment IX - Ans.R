@@ -60,8 +60,8 @@ summary(english.aov)
 # and the familiarity of the target words, we ran a two-way ANOVA including
 # the two-way interaction between the independent variables AgeSubject and
 # Familiarity. The results suggest a significant effect of AgeSubject 
-# (F(1, 4564) = 133.56, p < .001) and Familiarity (F(1, 4564) = 0.85, p < .001).
-# The interaction is also significant (F(1, 4564) = 0.05, p < .001).
+# (F(1, 4564) = 55525.97, p < .001) and Familiarity (F(1, 4564) = 351.73, p < .001).
+# The interaction is also significant (F(1, 4564) = 21.99, p < .001).
 
 # Task 5
 # Eta-square
