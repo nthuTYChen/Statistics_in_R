@@ -7,7 +7,7 @@ compareDist = function(vec) {
   par(mfrow=c(2, 2))
   # Add-one smoothing
   vec.nozero = vec + 1
-  # Convert the subset using natural log transformationhttp://127.0.0.1:23917/graphics/plot_zoom_png?width=1110&height=900
+  # Convert the subset using natural log transformation
   vec.log = log(vec.nozero)
   # Generate the Q-Q plot for the original data distribution
   qqnorm(vec.nozero, main = "Distribution before log Transformation")
