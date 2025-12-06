@@ -65,12 +65,13 @@ summary(english.aov)
 
 # Task 5
 # Eta-square
+ss.total = 133.56 + 0.85 + 0.05 + 11.02
 # AgeSubject
-133.56 / 11.02 # 12.11978 > 0.14; HUGE effect
+133.56 / ss.total # 0.9180643 > 0.14; HUGE effect
 # Fam.cat
-0.85 / 11.02 # 0.01 < 0.07713249 < 0.14; medium effect
+0.85 / ss.total # 0.00058... < 0.01; extremely small effect
 # AgeSubject x Fam.cat
-0.05 / 11.02 # 0.004537... < 0.01; extremely small effect
+0.05 / ss.total # 0.00034... < 0.01; extremely small effect
 
 # Task 6
 # ggplot2 is more convenient
