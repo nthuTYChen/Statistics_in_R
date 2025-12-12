@@ -239,18 +239,26 @@ english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
 # Check the Unit 6 handout for detailed explanations of the model summary.
 summary(english.lm.int)
 
+# Multiple linear regression when both predictors are categorical with two levels
+# See the Unit 6 handout for an explanation of why we expect the duration of [n]
+# in the ont- prefix is influenced simultaneously by the presence of the stop [t]
+# and the gender of speakers.
 library(languageR)
 head(durationsOnt)
 
+# Convert the two categorical predictors into factors so they can serve as 
+# predictors in our regression modeling. They are dummy-coded by default.
 durationsOnt$Sex.Fac = as.factor(durationsOnt$Sex)
 durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
-
-contrasts(durationsOnt$Sex.Fac)
+# Check the contrast table for the coding of the two predictors; in Sex.Fac,
+# female = 0 = the reference level and in Pl.Pr.Fac, no = 0 = the reference
+# levelcontrasts(durationsOnt$Sex.Fac)
 contrasts(durationsOnt$Pl.Pr.Fac)
-
+# Build the multiple regression model. See the Unit 6 handout for the explanation
+# of the statistics in the model.
 dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 summary(dur.cat.lm)
-
+# The same regression modeling, but with the sum-coding system.
 contrasts(durationsOnt$Sex.Fac) = contr.sum(2)
 contrasts(durationsOnt$Pl.Pr.Fac) = contr.sum(2)
 contrasts(durationsOnt$Sex.Fac)
@@ -259,25 +267,41 @@ contrasts(durationsOnt$Pl.Pr.Fac)
 dur.cat.sum = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
 summary(dur.cat.sum)
 
+# Multiple regression with categorical predictors is just like to compare 
+# different sample means...
 aggregate(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, 
           FUN = mean, data = durationsOnt)
 
+# The distribution of data points is slightly unbalanced.
 xtabs(~ Pl.Pr.Fac + Sex.Fac, data = durationsOnt)
-
+# Try to demonstrate that the order of predictors does not matter in regression
+# modeling, unlike in ANOVA. The estimates in regression are calculated all at 
+# once, but the variances are partitioned following the order of independent
+# variables in Type I ANOVA.
 dur.cat.lm.revord = lm(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, 
                        data = durationsOnt)
 summary(dur.cat.lm.revord)
 
+# Revisit the sample data set of Chen's (2020) artificial grammar learning
+# experiment to demonstrate logistic regression modeling on the binary
+# acceptance rate of test items by learners in different learning conditions.
 source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
 chen.sample = loadCourseCSV(2025, "6_Regression", "Chen2020Sample.csv")
 head(chen.sample)
 
+# In this script, we simply use the dummy-coding system. For the results
+# of logistic regression modeling using the sum-coding system, see the Unit 6
+# handout. There's no critical differences, except that the interpretation of
+# the intercept and the slopes is a bit different.
 chen.glm = glm(Accept ~ InitialTone * Group, 
                family = "binomial", data = chen.sample)
 summary(chen.glm)
 
+# logit = ln(p1 / (1 - p1)), and p1 = exp(logit / (1 + logit))
 exp(-0.15919)
-
 exp(-0.15919) / (1 + exp(-0.15919))
 
+# Again, multiple regression with categorical predictors is just like to compare 
+# different sample mean probabilities, if you try to convert all the logits
+# back to p1...
 aggregate(Accept ~ InitialTone + Group, FUN = mean, chen.sample)
