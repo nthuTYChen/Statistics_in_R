@@ -238,3 +238,46 @@ nrow(english.sub)
 english.lm.int = lm(RTlexdec ~ NounFreq.log * Familiarity, data = english.sub)
 # Check the Unit 6 handout for detailed explanations of the model summary.
 summary(english.lm.int)
+
+library(languageR)
+head(durationsOnt)
+
+durationsOnt$Sex.Fac = as.factor(durationsOnt$Sex)
+durationsOnt$Pl.Pr.Fac = as.factor(durationsOnt$PlosivePresent)
+
+contrasts(durationsOnt$Sex.Fac)
+contrasts(durationsOnt$Pl.Pr.Fac)
+
+dur.cat.lm = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
+summary(dur.cat.lm)
+
+contrasts(durationsOnt$Sex.Fac) = contr.sum(2)
+contrasts(durationsOnt$Pl.Pr.Fac) = contr.sum(2)
+contrasts(durationsOnt$Sex.Fac)
+contrasts(durationsOnt$Pl.Pr.Fac)
+
+dur.cat.sum = lm(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, data = durationsOnt)
+summary(dur.cat.sum)
+
+aggregate(DurationPrefixNasal ~ Pl.Pr.Fac * Sex.Fac, 
+          FUN = mean, data = durationsOnt)
+
+xtabs(~ Pl.Pr.Fac + Sex.Fac, data = durationsOnt)
+
+dur.cat.lm.revord = lm(DurationPrefixNasal ~ Sex.Fac * Pl.Pr.Fac, 
+                       data = durationsOnt)
+summary(dur.cat.lm.revord)
+
+source("https://raw.githubusercontent.com/nthuTYChen/Statistics_in_R/refs/heads/main/courseUtil.R")
+chen.sample = loadCourseCSV(2025, "6_Regression", "Chen2020Sample.csv")
+head(chen.sample)
+
+chen.glm = glm(Accept ~ InitialTone * Group, 
+               family = "binomial", data = chen.sample)
+summary(chen.glm)
+
+exp(-0.15919)
+
+exp(-0.15919) / (1 + exp(-0.15919))
+
+aggregate(Accept ~ InitialTone + Group, FUN = mean, chen.sample)
