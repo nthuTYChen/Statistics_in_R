@@ -135,29 +135,26 @@ ggplot(data = lexdec.sub.2.5, mapping = aes(x = Frequency, y = RT,
 # To test the research hypothesis, we regressed log reaction time against 
 # lemma frequency and the sum-coded factor morphological complexity. The two-way
 # interaction between the two predictors was also included. The results suggest
-# a significant main effect of morphological complexity (B = -0.017, SE = 0.038, 
-# t = -2.753, p = .005) and a significant two-way interaction between the 
-# predictors (B = 0.023, SE = 0.009, t = 2.489, p = .013).
+# a significant main effect of lemma frequency (B = -0.022, SE = 0.009, t = -2.349, 
+# p = .019) and morphological complexity (B = -0.077, SE = 0.038, 
+# t = -2.019, p = .044). The two-way interaction between the predictors 
+# was not significant (B = 0.013, SE = 0.009, t = 1.856, p = .064).
 
-# The model output does not support the hypothesis regarding the frequency effect,
-# since overall, lemma frequency does not significantly affect the latency of
-# correct responses. However, morphological complexity significantly impacts
-# correct response RT, as participants responded to morphologically simple words
-# faster than to morphologically complex words, with a mean difference of
-# 0.21 log ms (see my explanation in Task 3). The hypothesis that the effect of
-# frequency varies by morphological complexity is supported by the significant
-# two-way interaction. The frequency effect is weaker for morphologically complex
-# words (or, alternatively, stronger for morphologically simple words). That is,
-# morphologically complex words are just more difficult to process, regardless of
-# their lemma frequency.
+# The model output does support the hypothesis regarding the frequency effect;
+# higher frequency predicts a faster correct response Morphological complexity also
+# significantly impacts correct response RT, as participants responded to 
+# morphologically simple words faster than to morphologically complex words, 
+# with a mean difference of 0.154 log ms (see my explanation in Task 3). 
+# The hypothesis that the effect of frequency varies by morphological complexity
+# is not supported by the nonsignificant two-way interaction.
 
 # Task 6
 
 # Based only on the SD+-2 version
 # Note that simplex = -1 and complex = 1 in the sum-coded factor Complex
-6.443734 + -0.016956 * 6.512 + -0.105164 * -1 + 6.512 * -1 * 0.022937 # 6.289115
-6.443734 + -0.016956 * 4.783 + -0.105164 * -1 + 4.783 * -1 * 0.022937 # 6.35809
-6.443734 + -0.016956 * 5.175 + -0.105164 * -1 + 5.175 * -1 * 0.022937 # 6.342452
+6.465967 + -0.021581 * 6.512 + -0.077288 * -1 + 6.512 * -1 * 0.017048 # 6.291703
+6.465967 + -0.021581 * 4.783 + -0.077288 * -1 + 4.783 * -1 * 0.017048 # 6.358492
+6.465967 + -0.021581 * 5.175 + -0.077288 * -1 + 5.175 * -1 * 0.017048 # 6.34335
 
 # Task 7
 
@@ -186,10 +183,10 @@ lexdec.sub.10$Complex.num = ifelse(lexdec.sub.10$Complex.sum == "complex", 1, -1
 
 # Predicted values based on the beta coefficients
 lexdec.sub.10$Predict = 
-  6.443734 + # Intercept
-  -0.016956 * lexdec.sub.10$Frequency + # Frequency effect
-  -0.105164 * lexdec.sub.10$Complex.num + # Complex effect
-  lexdec.sub.10$Frequency * lexdec.sub.10$Complex.num * 0.022937 # Frequency * Complex
+  6.465967 + # Intercept
+  -0.021581 * lexdec.sub.10$Frequency + # Frequency effect
+  -0.077288 * lexdec.sub.10$Complex.num + # Complex effect
+  lexdec.sub.10$Frequency * lexdec.sub.10$Complex.num * 0.017048 # Frequency * Complex
 # Rounding
 lexdec.sub.10$Predict.short = round(lexdec.sub.10$Predict, 3)
 
