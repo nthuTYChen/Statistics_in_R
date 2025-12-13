@@ -4,7 +4,7 @@ head(lexdec)
 # Part I
 # Task 1
 # Extract the subset that includes only correct judgments
-lexdec.corr = subset(lexdec, Correct = "correct")
+lexdec.corr = subset(lexdec, Correct == "correct")
 
 # Remove outlier observations based on RT and Frequency, which are the two crucial continuous
 # variables in our hypothesis testing process.
