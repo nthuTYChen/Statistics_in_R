@@ -65,33 +65,35 @@ lexdec.lm.2 = lm(RT ~ Frequency * Complex.sum, data = lexdec.sub.2)
 summary(lexdec.lm.2)
 
 #                        Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)             6.443734   0.038204 168.665  < 2e-16 ***
-#Frequency              -0.016956   0.009216  -1.840  0.06597 .  
-#Complex.sum1           -0.105164   0.038204  -2.753  0.00598 ** 
-#Frequency:Complex.sum1  0.022937   0.009216   2.489  0.01292 * 
+#(Intercept)             6.465967   0.038278 168.921   <2e-16 ***
+#Frequency              -0.021581   0.009188  -2.349   0.0190 *  
+#Complex.sum1           -0.077288   0.038278  -2.019   0.0437 *  
+#Frequency:Complex.sum1  0.017048   0.009188   1.856   0.0637 . 
 
 lexdec.lm.2.5 = lm(RT ~ Frequency * Complex.sum, data = lexdec.sub.2.5)
 summary(lexdec.lm.2.5)
 
 #                        Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)             6.476551   0.029746 217.730  < 2e-16 ***
-#Frequency              -0.021637   0.007419  -2.917  0.00359 ** 
-#Complex.sum1           -0.083342   0.029746  -2.802  0.00514 ** 
-#Frequency:Complex.sum1  0.018348   0.007419   2.473  0.01349 *
+#(Intercept)             6.494669   0.029425 220.723  < 2e-16 ***
+#Frequency              -0.025931   0.007299  -3.553 0.000393 ***
+#Complex.sum1           -0.058550   0.029425  -1.990 0.046786 *  
+#Frequency:Complex.sum1  0.012850   0.007299   1.761 0.078518 .   
 
 # Before explaining the beta coefficients, it is important to note a 
 # substaintial difference in the effect of Frequency between my two models
-# above. SD+-2.5 might be too conservative so that many outliers are kept in
+# above. SD+-2.5 might be too loose so that many outliers are kept in
 # the dataset to inflat the effect of Frequency. That's an increase
 # in the chance of Type I Error (a false positive).
 
 # The beta coeffiencient of the intercept suggests that correct responses are
-# on average as long as 6.44/6.39 log-ms when the frequency is zero, regardless
+# on average as long as 6.47/6.5 log-ms when the frequency is zero, regardless
 # of whether the target is morphologically complex or not (Complex is sum-coded
 # so the intercepts represent a predicted RT when Complex is zero - that is,
-# when Complex is neither simplex = 1 or complex = -1). The coefficients of
+# when Complex is neither simplex = 1 or complex = -1).  The coefficients of
+# Frequency means when log frequency increases by one, log RT decreases by 
+# -0.022/-0.026, regardless of morphological complexity. The coefficients of 
 # Complex mean that when log lemma frequency is hold constant, log RT on average
-# differs by |-0.105/-0.083| x 2 = 0.21/0.166 log ms between morphologically
+# differs by |-0.077/-0.059| x 2 = 0.154/0.118 log ms between morphologically
 # simple and complex words.
 
 # Task 4
